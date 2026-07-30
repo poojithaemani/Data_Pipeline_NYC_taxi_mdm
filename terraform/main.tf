@@ -1,17 +1,17 @@
 module "s3" {
   source = "./modules/s3"
 
-  bucket_name = var.bucket_name
+  bucket_name  = var.bucket_name
   project_name = var.project_name
-  environment = var.environment
+  environment  = var.environment
 }
 
 module "iam" {
   source = "./modules/iam"
 
-  bucket_name = var.bucket_name
+  bucket_name  = var.bucket_name
   project_name = var.project_name
-  environment = var.environment
+  environment  = var.environment
 }
 
 module "cloudwatch" {
@@ -29,9 +29,9 @@ module "rds" {
   project_name = var.project_name
   environment  = var.environment
 
-  vpc_id              = var.vpc_id
-  subnet_ids          = var.subnet_ids
-  allowed_cidr_blocks = var.allowed_cidr_blocks
+  vpc_id                   = var.vpc_id
+  subnet_ids               = var.subnet_ids
+  source_security_group_id = var.source_security_group_id
 
   database_name   = var.database_name
   master_username = var.master_username

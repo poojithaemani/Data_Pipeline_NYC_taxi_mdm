@@ -18,9 +18,9 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
-variable "allowed_cidr_blocks" {
-  description = "CIDR blocks allowed to connect to PostgreSQL"
-  type        = list(string)
+variable "source_security_group_id" {
+  description = "The ID of the security group to allow ingress from."
+  type        = string
 }
 
 variable "database_name" {
@@ -50,10 +50,4 @@ variable "instance_class" {
   description = "RDS instance class"
   type        = string
   default     = "db.t3.micro"
-}
-
-variable "allowed_ipv4_cidr_blocks" {
-  description = "Allowed IPv4 CIDR blocks"
-  type        = list(string)
-  default     = []
 }
