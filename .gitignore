@@ -1,0 +1,20 @@
+# ==============================
+# Terraform
+# ==============================
+
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+terraform.tfvars.json
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ==============================
+# Environment
+# ==============================
+/configs/.env
