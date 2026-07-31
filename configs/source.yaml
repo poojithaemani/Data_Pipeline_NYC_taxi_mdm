@@ -1,0 +1,29 @@
+sources:
+  taxi_zones:
+    type: csv
+    source: https://d37ci6vzurychx.cloudfront.net/misc/taxi+_zone_lookup.csv
+    primary_key: location_id
+    destination_table: taxi_zones
+    required_columns:
+      - LocationID
+      - Borough
+      - Zone
+      - service_zone
+    column_mapping:
+      LocationID: location_id
+      Borough: borough
+      Zone: zone
+      service_zone: service_zone
+
+  yellow_taxi:
+    type: parquet
+    source: https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-01.parquet
+    primary_key: null
+    destination_table: null
+    destination_path: bronze/transactions/yellow_taxi
+    required_columns:
+      - VendorID
+      - tpep_pickup_datetime
+      - tpep_dropoff_datetime
+      - PULocationID
+      - DOLocationID
