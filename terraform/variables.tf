@@ -28,8 +28,14 @@ variable "subnet_ids" {
 }
 
 variable "source_security_group_id" {
-  description = "The ID of the security group to allow ingress from."
+  description = "The ID of the security group to allow ingress from. Required when create_rds = true."
   type        = string
+  default     = ""
+  # Require a value only when RDS is being created
+  validation {
+    condition     = var.create_rds ? length(trimspace(var.source_security_group_id)) > 0 : true
+    error_message = "source_security_group_id must be provided when create_rds is true"
+  }
 }
 
 variable "database_name" {
@@ -42,8 +48,15 @@ variable "master_username" {
 }
 
 variable "master_password" {
+  description = "Master password for the RDS instance. Required only when create_rds is true."
   type      = string
   sensitive = true
+  default   = ""
+  # Require a non-empty password only when RDS is being created
+  validation {
+    condition     = var.create_rds ? length(trimspace(var.master_password)) > 0 : true
+    error_message = "master_password must be provided when create_rds is true"
+  }
 }
 
 variable "allocated_storage" {
@@ -54,6 +67,14 @@ variable "allocated_storage" {
 variable "instance_class" {
   type    = string
   default = "db.t3.micro"
+}
+
+# Toggle creation of RDS resources in this root. When false, RDS module is skipped
+# and RDS-specific variables are not required. Useful to plan/apply metadata-only changes.
+variable "create_rds" {
+  type        = bool
+  default     = true
+  description = "Whether to create RDS infrastructure"
 }
 
 # Glue catalog database names

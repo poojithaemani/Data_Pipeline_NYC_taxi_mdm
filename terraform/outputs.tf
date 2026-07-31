@@ -11,19 +11,23 @@ output "api_gateway_log_group" {
 }
 
 output "rds_endpoint" {
-  value = module.rds.db_endpoint
+  value       = module.rds.db_endpoint
+  description = "RDS endpoint (empty when create_rds = false)"
 }
 
 output "rds_address" {
-  value = module.rds.db_address
+  value       = module.rds.db_address
+  description = "RDS address (empty when create_rds = false)"
 }
 
 output "rds_database" {
-  value = module.rds.db_name
+  value       = module.rds.db_name
+  description = "RDS database name (empty when create_rds = false)"
 }
 
 output "rds_security_group" {
-  value = module.rds.db_security_group_id
+  value       = module.rds.db_security_group_id
+  description = "RDS security group id (empty when create_rds = false)"
 }
 
 # Phase 2 outputs - Glue Catalog & Crawlers & Athena
@@ -61,4 +65,13 @@ output "gold_crawler_name" {
 
 output "athena_workgroup" {
   value = aws_athena_workgroup.this.name
+}
+
+# Phase 2 outputs - Glue Jobs
+output "silver_etl_job_name" {
+  value = aws_glue_job.silver_etl.name
+}
+
+output "gold_etl_job_name" {
+  value = aws_glue_job.gold_etl.name
 }
