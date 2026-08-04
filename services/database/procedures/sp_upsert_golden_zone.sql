@@ -9,8 +9,8 @@
 --   p_zone TEXT,
 --   p_service_zone TEXT,
 --   p_record_hash TEXT,
---   p_effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---   OUT p_status TEXT
+--   OUT p_status TEXT,
+--   p_effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 -- );
 --
 -- Returns p_status one of: 'INSERTED', 'UPDATED', 'NO_CHANGE'.
@@ -28,8 +28,8 @@ CREATE OR REPLACE PROCEDURE sp_upsert_golden_zone(
     p_zone TEXT,
     p_service_zone TEXT,
     p_record_hash TEXT,
-    p_effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    OUT p_status TEXT
+    OUT p_status TEXT,
+    p_effective_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )
 LANGUAGE plpgsql
 AS $$
