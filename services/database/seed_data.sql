@@ -20,10 +20,12 @@ BEGIN;
 -- =================================================================
 
 INSERT INTO vendors (vendor_name)
-VALUES
+SELECT vname
+FROM (VALUES
     ('Creative Mobile Technologies'),
     ('VeriFone Inc.')
-ON CONFLICT (vendor_name) DO NOTHING;
+) AS v(vname)
+WHERE NOT EXISTS (SELECT 1 FROM vendors WHERE vendor_name = v.vname);
 
 COMMIT;
 

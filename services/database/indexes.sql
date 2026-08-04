@@ -17,10 +17,13 @@
 
 -- =================================================================
 -- Table: vendors
--- Note: The UNIQUE constraint on `vendor_name` already creates a unique index.
--- An explicit index is not strictly required but can be created for clarity.
+-- For SCD Type 2 we enforce uniqueness only for the current row using a partial unique index.
+-- Create the following partial unique index (CONCURRENTLY in production):
+-- CREATE UNIQUE INDEX CONCURRENTLY idx_vendors_vendor_name_current ON vendors (vendor_name) WHERE is_current;
+-- Recommended supporting index (CONCURRENTLY):
+-- CREATE INDEX CONCURRENTLY idx_vendors_vendorid_effective_date ON vendors (vendor_id, effective_date);
+-- Note: Do not drop the original UNIQUE constraint until partial unique index is in place and validated.
 -- =================================================================
-CREATE UNIQUE INDEX IF NOT EXISTS idx_vendors_vendor_name ON vendors(vendor_name);
 
 -- =================================================================
 -- Table: taxi_zones
@@ -31,11 +34,14 @@ CREATE INDEX IF NOT EXISTS idx_taxi_zones_borough ON taxi_zones(borough);
 
 -- =================================================================
 -- Table: golden_zones
--- Note: The UNIQUE constraint on `(borough, zone)` already creates an index.
--- Additional indexes can be added if other lookup patterns are common.
--- =================================================================
--- No additional indexes are immediately necessary due to the UNIQUE constraint
--- covering the primary lookup pattern.
+-- For SCD Type 2 we enforce uniqueness only for the current row using a partial unique index.
+-- Keep the legacy UNIQUE(borough, zone) until migration 008 removes it after validation.
+-- Create the following partial unique index (CONCURRENTLY in production):
+-- CREATE UNIQUE INDEX CONCURRENTLY idx_golden_locationid_current ON golden_zones (location_id) WHERE is_current AND location_id IS NOT NULL;
+-- Recommended supporting indexes (CONCURRENTLY):
+-- CREATE INDEX CONCURRENTLY idx_golden_borough_zone_effective ON golden_zones (borough, zone, effective_date);
+-- CREATE INDEX CONCURRENTLY idx_golden_effective_date ON golden_zones (effective_date);
+-- Note: Do not drop the original UNIQUE constraint until the partial unique index is in place and validated.
 
 -- =================================================================
 -- Table: zone_matches
