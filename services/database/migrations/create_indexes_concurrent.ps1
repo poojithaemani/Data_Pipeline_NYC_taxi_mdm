@@ -41,9 +41,10 @@ function Exec-PSQL {
 
 # Index definitions
 $indexes = @(
-  @{ name = 'idx_vendors_vendorid_current'; sql = "CREATE UNIQUE INDEX CONCURRENTLY idx_vendors_vendorid_current ON vendors (vendor_id) WHERE is_current;" },
+  @{ name = 'uix_vendors_current'; sql = "CREATE UNIQUE INDEX CONCURRENTLY uix_vendors_current ON vendors (vendor_id) WHERE is_current = true;" },
   @{ name = 'idx_vendors_vendorid_effective_date'; sql = "CREATE INDEX CONCURRENTLY idx_vendors_vendorid_effective_date ON vendors (vendor_id, effective_date);" },
-  @{ name = 'idx_golden_locationid_current'; sql = "CREATE UNIQUE INDEX CONCURRENTLY idx_golden_locationid_current ON golden_zones (location_id) WHERE is_current AND location_id IS NOT NULL;" },
+  @{ name = 'uix_golden_zones_current_by_golden_id'; sql = "CREATE UNIQUE INDEX CONCURRENTLY uix_golden_zones_current_by_golden_id ON golden_zones (golden_id) WHERE is_current = true;" },
+  @{ name = 'uix_golden_zones_current_by_location_id'; sql = "CREATE UNIQUE INDEX CONCURRENTLY uix_golden_zones_current_by_location_id ON golden_zones (location_id) WHERE is_current = true AND location_id IS NOT NULL;" },
   @{ name = 'idx_golden_borough_zone_effective'; sql = "CREATE INDEX CONCURRENTLY idx_golden_borough_zone_effective ON golden_zones (borough, zone, effective_date);" },
   @{ name = 'idx_golden_effective_date'; sql = "CREATE INDEX CONCURRENTLY idx_golden_effective_date ON golden_zones (effective_date);" },
   @{ name = 'idx_zone_matches_golden_zone_row_id'; sql = "CREATE INDEX CONCURRENTLY idx_zone_matches_golden_zone_row_id ON zone_matches (golden_zone_row_id);" }

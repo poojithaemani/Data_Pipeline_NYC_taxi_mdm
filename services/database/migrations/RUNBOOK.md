@@ -10,30 +10,26 @@ Staging run
 
 1. Apply 001_add_surrogate_keys.sql
 2. Apply 002_add_scd_columns.sql
-3. Apply 003_initialize_records.sql
-   - Inspect the SELECT output for golden_zones_location_id_null and resolve ambiguous mappings.
-4. Apply 004_add_constraints.sql
-5. Run 005a_zone_matches_mapping.sql
-   - This adds zone_matches.golden_zone_row_id, populates it from golden_zones.golden_zone_row_id and optionally adds a FK when mapping is complete.
+3. Apply 002a_add_hash_column.sql
+4. Apply 003_initialize_records.sql
+   - Inspect SELECT output for golden_zones_location_id_null and resolve ambiguous mappings.
+5. Apply 004_add_constraints.sql
+6. Run 005a_zone_matches_mapping.sql
    - If unmapped rows remain, export them for manual resolution and do not proceed.
-6. Run create_indexes_concurrent.ps1 to create indexes CONCURRENTLY (see below). Use DryRun first:
+7. Run create_indexes_concurrent.ps1 to create indexes CONCURRENTLY (see below). Use DryRun first:
    - Dry run: ./create_indexes_concurrent.ps1 -Host <host> -Database <db> -User <user> -DryRun:$true
-   - Real run: $env:PGPASSWORD='<pwd>'; ./create_indexes_concurrent.ps1 -Host <host> -Database <db> -User <user> -DryRun:$false
-7. Run 006_validate_dependencies.sql and address any results. Require sign-off by DB owner.
-8. Run 007_prepare_business_keys.sql to add UNIQUE constraints to business keys.
-9. Run 008_recreate_legacy_fk.sql to shift the FK dependency to the UNIQUE constraint.
-10. Run 009_switch_primary_keys.sql in a maintenance window to switch to surrogate PKs.
-11. Run 010_switch_zone_matches_fk.sql to point the FK to the new surrogate PK.
-12. After validation, run 011_cleanup.sql to remove the now-redundant UNIQUE constraint on `golden_id`.
+   - Real run: $env:PGPASSWORD='<pwd>'; ./create_indexes_concurrent.ps1 -Host <host> -Database <db> -User <user>
+8. Run 006_validate_dependencies.sql and address any results. Require sign-off by DB owner.
+9. Run 007_prepare_pk_switch.sql to drop the legacy foreign key.
+10. Run 008_switch_primary_keys.sql in a maintenance window to switch to surrogate PKs.
+11. Run 009_finalize_scd_schema.sql to recreate the foreign key.
 
 Production run notes
 
-- Execute 1–4 during normal window.
+- Execute 1–5 during normal window.
 - Create indexes using create_indexes_concurrent.ps1 during low-traffic time; ensure no long-running transactions.
 - Run dependency validation and obtain sign-off via ticketing system.
-- Execute PK switch (007) during maintenance window; expect brief exclusive locks.
-- Execute PK switch (009) during maintenance window; expect brief exclusive locks.
-- After validation, run 011 to drop legacy constraints.
+- Execute PK switch (008) during maintenance window; expect brief exclusive locks.
 
 Rollback plan
 

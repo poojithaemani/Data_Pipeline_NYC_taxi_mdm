@@ -1,21 +1,18 @@
 -- =================================================================
--- 010_switch_zone_matches_fk.sql
+-- 009_finalize_scd_schema.sql
 --
 -- Description:
--- Switches the foreign key on zone_matches to reference the new surrogate
--- primary key on golden_zones (golden_zone_row_id).
+-- Finalizes the SCD Type 2 schema by:
+-- 1. Recreating the foreign key on zone_matches to point to the new surrogate PK.
+-- 2. Adding UNIQUE constraints on the business keys (vendor_id, golden_id)
+--    to ensure entity integrity for legacy lookups.
 --
--- This must run AFTER the primary key on golden_zones has been switched.
+-- This must run AFTER the primary keys have been switched.
 -- =================================================================
 
 BEGIN;
 
--- 1) Drop the old foreign key that references the business key (golden_id)
--- The constraint name is derived from the table and column it references.
-ALTER TABLE zone_matches DROP CONSTRAINT IF EXISTS zone_matches_golden_zone_id_fkey;
-
--- 2) Add the new foreign key referencing the surrogate key (golden_zone_row_id)
--- This reuses the logic from the original 007a migration.
+-- 1) Recreate the foreign key on zone_matches
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_zone_matches_golden_zone_row' AND conrelid = 'zone_matches'::regclass) THEN
