@@ -45,7 +45,8 @@ $indexes = @(
   @{ name = 'idx_vendors_vendorid_effective_date'; sql = "CREATE INDEX CONCURRENTLY idx_vendors_vendorid_effective_date ON vendors (vendor_id, effective_date);" },
   @{ name = 'idx_golden_locationid_current'; sql = "CREATE UNIQUE INDEX CONCURRENTLY idx_golden_locationid_current ON golden_zones (location_id) WHERE is_current AND location_id IS NOT NULL;" },
   @{ name = 'idx_golden_borough_zone_effective'; sql = "CREATE INDEX CONCURRENTLY idx_golden_borough_zone_effective ON golden_zones (borough, zone, effective_date);" },
-  @{ name = 'idx_golden_effective_date'; sql = "CREATE INDEX CONCURRENTLY idx_golden_effective_date ON golden_zones (effective_date);" }
+  @{ name = 'idx_golden_effective_date'; sql = "CREATE INDEX CONCURRENTLY idx_golden_effective_date ON golden_zones (effective_date);" },
+  @{ name = 'idx_zone_matches_golden_zone_row_id'; sql = "CREATE INDEX CONCURRENTLY idx_zone_matches_golden_zone_row_id ON zone_matches (golden_zone_row_id);" }
 )
 
 Check-Psql

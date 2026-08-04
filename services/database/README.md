@@ -1,8 +1,8 @@
-Database SCD Type 2 — Phase 3A
+Database SCD Type 2 
 
 Purpose
 -------
-This README documents the Phase 3A SCD Type 2 schema changes for the master database. It explains why surrogate keys are introduced, why existing business keys are preserved, the migration sequence, safe execution steps, and how this prepares the project for stored procedures, Glue SCD jobs, and Step Functions.
+This README documents the Phase SCD Type 2 schema changes for the master database. It explains why surrogate keys are introduced, why existing business keys are preserved, the migration sequence, safe execution steps, and how this prepares the project for stored procedures, Glue SCD jobs, and Step Functions.
 
 Why surrogate row keys are introduced
 ------------------------------------
