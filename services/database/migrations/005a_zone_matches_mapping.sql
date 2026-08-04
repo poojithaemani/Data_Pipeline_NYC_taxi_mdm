@@ -30,17 +30,15 @@ WHERE zm.golden_zone_row_id IS NULL
 -- Expect unmapped_matches = 0 before adding FK
 SELECT
   COUNT(*) AS total_matches,
-  SUM(CASE WHEN golden_zone_row_id IS NULL THEN 1 ELSE 0 END) AS unmapped_matches
+  COALESCE(
+    SUM(CASE WHEN golden_zone_row_id IS NULL THEN 1 ELSE 0 END), 
+    0 
+   ) AS unmapped_matches
 FROM zone_matches;
 
 -- 4) Add index on zone_matches.golden_zone_row_id to support FK creation (create concurrently in production)
 -- Example (run outside transaction):
 -- CREATE INDEX CONCURRENTLY idx_zone_matches_golden_zone_row_id ON zone_matches (golden_zone_row_id);
-
-COMMIT;
--- 5) Foreign key creation has been moved to 007a_add_zone_matches_fk.sql.
---    This is because golden_zones.golden_zone_row_id is not yet a PRIMARY KEY.
---    The supporting index should be created concurrently before running the FK migration.
 
 COMMIT;
 
