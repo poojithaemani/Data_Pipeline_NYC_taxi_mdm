@@ -1,11 +1,13 @@
 Phase 3A Migration Runbook
 
 Pre-requisites
+
 - Take an RDS snapshot and record the snapshot identifier.
 - Notify stakeholders and schedule a maintenance window for PK switch (007).
 - Ensure psql client is available on the machine where you will run index creation (create_indexes_concurrent.ps1 requires psql).
 
 Staging run
+
 1. Apply 001_add_surrogate_keys.sql
 2. Apply 002_add_scd_columns.sql
 3. Apply 003_initialize_records.sql
@@ -18,22 +20,29 @@ Staging run
    - Dry run: ./create_indexes_concurrent.ps1 -Host <host> -Database <db> -User <user> -DryRun:$true
    - Real run: $env:PGPASSWORD='<pwd>'; ./create_indexes_concurrent.ps1 -Host <host> -Database <db> -User <user> -DryRun:$false
 7. Run 006_validate_dependencies.sql and address any results. Require sign-off by DB owner.
-8. Run 007_switch_primary_keys.sql in maintenance window.
-8. After validation window, run 008_drop_legacy_constraints.sql to remove global unique constraints.
+8. Run 007_prepare_business_keys.sql to add UNIQUE constraints to business keys.
+9. Run 008_recreate_legacy_fk.sql to shift the FK dependency to the UNIQUE constraint.
+10. Run 009_switch_primary_keys.sql in a maintenance window to switch to surrogate PKs.
+11. Run 010_switch_zone_matches_fk.sql to point the FK to the new surrogate PK.
+12. After validation, run 011_cleanup.sql to remove the now-redundant UNIQUE constraint on `golden_id`.
 
 Production run notes
+
 - Execute 1–4 during normal window.
 - Create indexes using create_indexes_concurrent.ps1 during low-traffic time; ensure no long-running transactions.
 - Run dependency validation and obtain sign-off via ticketing system.
 - Execute PK switch (007) during maintenance window; expect brief exclusive locks.
-- After validation, run 008 to drop legacy constraints.
+- Execute PK switch (009) during maintenance window; expect brief exclusive locks.
+- After validation, run 011 to drop legacy constraints.
 
 Rollback plan
+
 - If anything goes wrong before PK switch: restore from snapshot.
 - If issue occurs after PK switch but before dropping legacy constraints: restore from snapshot; manual rollback is high risk.
 - Always prefer snapshot restore for rollback — document the snapshot id and migration step that triggered restore.
 
 Index creation (example commands)
+
 - psql -h <host> -U <user> -d <db> -c "CREATE UNIQUE INDEX CONCURRENTLY idx_vendors_vendorid_current ON vendors (vendor_id) WHERE is_current;"
 - psql -h <host> -U <user> -d <db> -c "CREATE INDEX CONCURRENTLY idx_vendors_vendorid_effective_date ON vendors (vendor_id, effective_date);"
 - psql -h <host> -U <user> -d <db> -c "CREATE UNIQUE INDEX CONCURRENTLY idx_golden_locationid_current ON golden_zones (location_id) WHERE is_current AND location_id IS NOT NULL;"
@@ -41,12 +50,14 @@ Index creation (example commands)
 - psql -h <host> -U <user> -d <db> -c "CREATE INDEX CONCURRENTLY idx_golden_effective_date ON golden_zones (effective_date);"
 
 Validation queries (after full run)
+
 - Confirm columns exist: information_schema.columns queries
 - Check initialization counts: SELECT counts in README + 003
 - Verify partial unique indexes exist: SELECT to_regclass('public.idx_name')
 - Run example point-in-time queries
 
 Contact
+
 - DB owner: (add your contact)
 - ETL owner: (add your contact)
 
