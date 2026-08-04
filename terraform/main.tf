@@ -24,6 +24,7 @@ module "cloudwatch" {
 }
 
 module "rds" {
+  count  = var.create_rds ? 1 : 0
   source = "./modules/rds"
 
   project_name = var.project_name

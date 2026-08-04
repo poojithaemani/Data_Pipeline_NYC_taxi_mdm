@@ -11,22 +11,22 @@ output "api_gateway_log_group" {
 }
 
 output "rds_endpoint" {
-  value       = module.rds.db_endpoint
+  value       = var.create_rds ? module.rds[0].db_endpoint : null
   description = "RDS endpoint (empty when create_rds = false)"
 }
 
 output "rds_address" {
-  value       = module.rds.db_address
+  value       = var.create_rds ? module.rds[0].db_address : null
   description = "RDS address (empty when create_rds = false)"
 }
 
 output "rds_database" {
-  value       = module.rds.db_name
+  value       = var.create_rds ? module.rds[0].db_name : null
   description = "RDS database name (empty when create_rds = false)"
 }
 
 output "rds_security_group" {
-  value       = module.rds.db_security_group_id
+  value       = var.create_rds ? module.rds[0].db_security_group_id : null
   description = "RDS security group id (empty when create_rds = false)"
 }
 
@@ -61,6 +61,14 @@ output "silver_crawler_name" {
 
 output "gold_crawler_name" {
   value = aws_glue_crawler.gold.name
+}
+
+output "gold_summary_table_names" {
+  description = "The names of the Gold summary tables created by the crawler."
+  value = [
+    # The crawler creates tables from the last component of the S3 path.
+    for path in aws_glue_crawler.gold.delta_target[0].delta_tables : basename(path)
+  ]
 }
 
 output "athena_workgroup" {

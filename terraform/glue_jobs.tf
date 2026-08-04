@@ -31,18 +31,47 @@ resource "aws_s3_object" "gold_etl_script" {
   }
 }
 
+resource "aws_s3_object" "glue_temp_dir" {
+  bucket  = var.bucket_name
+  key     = "glue/temp/"
+  content = "" # Empty content for a folder placeholder
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+    Description = "Placeholder for Glue temporary directory"
+  }
+}
+
 ################################################################################
 # AWS Glue Jobs
 #
 # Defines the Bronze-to-Silver and Silver-to-Gold ETL jobs.
 ################################################################################
 
+locals {
+  # Common default arguments for all Glue ETL jobs
+  common_glue_job_args = {
+    "--job-language"                     = "python"
+    "--job-bookmark-option"              = "job-bookmark-disable"
+    "--enable-glue-datacatalog"          = "true"
+    "--enable-metrics"                   = "true"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--datalake-formats"                 = "delta"
+    "--TempDir"                          = "s3://${var.bucket_name}/glue/temp/"
+    "--spark-sql-extensions"             = "io.delta.sql.DeltaSparkSessionExtension"
+    "--spark-sql-catalog-spark_catalog"  = "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    "--additional-python-modules"        = "pyarrow>=15.0.0"
+  }
+}
+
 resource "aws_glue_job" "silver_etl" {
-  name         = "${var.project_name}-yellow-taxi-silver-etl"
-  role_arn     = aws_iam_role.glue_role.arn
-  glue_version = "4.0"
-  worker_type  = "G.1X"
-  number_of_workers = 2
+  name              = "${var.project_name}-yellow-taxi-silver-etl"
+  role_arn          = aws_iam_role.glue_role.arn
+  glue_version      = "4.0"
+  worker_type       = var.glue_job_worker_type
+  number_of_workers = var.glue_job_number_of_workers
 
   command {
     name            = "glueetl"
@@ -50,16 +79,13 @@ resource "aws_glue_job" "silver_etl" {
     script_location = "s3://${aws_s3_object.silver_etl_script.bucket}/${aws_s3_object.silver_etl_script.key}"
   }
 
-  default_arguments = {
-    "--job-language"                                      = "python"
-    "--job-bookmark-option"                               = "job-bookmark-disable"
-    "--enable-metrics"                                    = ""
-    "--spark-sql-extensions"                              = "io.delta.sql.DeltaSparkSessionExtension"
-    "--spark-sql-catalog-spark_catalog"                   = "org.apache.spark.sql.delta.catalog.DeltaCatalog"
-    "--additional-python-modules"                         = "pyarrow>=15.0.0"
-    "--bronze_path"                                       = "s3://${var.bucket_name}/bronze/transactions/yellow_taxi/"
-    "--silver_path"                                       = "s3://${var.bucket_name}/silver/yellow_taxi/"
-  }
+  default_arguments = merge(
+    local.common_glue_job_args,
+    {
+      "--bronze_path" = "s3://${var.bucket_name}/${var.bronze_transactions_path}"
+      "--silver_path" = "s3://${var.bucket_name}/${var.silver_delta_table_path}/"
+    }
+  )
 
   tags = {
     Name        = "${var.project_name}-yellow-taxi-silver-etl"
@@ -70,11 +96,11 @@ resource "aws_glue_job" "silver_etl" {
 }
 
 resource "aws_glue_job" "gold_etl" {
-  name         = "${var.project_name}-yellow-taxi-gold-etl"
-  role_arn     = aws_iam_role.glue_role.arn
-  glue_version = "4.0"
-  worker_type  = "G.1X"
-  number_of_workers = 2
+  name              = "${var.project_name}-yellow-taxi-gold-etl"
+  role_arn          = aws_iam_role.glue_role.arn
+  glue_version      = "4.0"
+  worker_type       = var.glue_job_worker_type
+  number_of_workers = var.glue_job_number_of_workers
 
   command {
     name            = "glueetl"
@@ -82,16 +108,13 @@ resource "aws_glue_job" "gold_etl" {
     script_location = "s3://${aws_s3_object.gold_etl_script.bucket}/${aws_s3_object.gold_etl_script.key}"
   }
 
-  default_arguments = {
-    "--job-language"                                      = "python"
-    "--job-bookmark-option"                               = "job-bookmark-disable"
-    "--enable-metrics"                                    = ""
-    "--spark-sql-extensions"                              = "io.delta.sql.DeltaSparkSessionExtension"
-    "--spark-sql-catalog-spark_catalog"                   = "org.apache.spark.sql.delta.catalog.DeltaCatalog"
-    "--additional-python-modules"                         = "pyarrow>=15.0.0"
-    "--silver_path"                                       = "s3://${var.bucket_name}/silver/yellow_taxi/"
-    "--gold_path"                                         = "s3://${var.bucket_name}/gold/yellow_taxi/"
-  }
+  default_arguments = merge(
+    local.common_glue_job_args,
+    {
+      "--silver_path" = "s3://${var.bucket_name}/${var.silver_delta_table_path}/"
+      "--gold_path"   = "s3://${var.bucket_name}/${var.gold_delta_table_path}/"
+    }
+  )
 
   tags = {
     Name        = "${var.project_name}-yellow-taxi-gold-etl"

@@ -49,9 +49,9 @@ variable "master_username" {
 
 variable "master_password" {
   description = "Master password for the RDS instance. Required only when create_rds is true."
-  type      = string
-  sensitive = true
-  default   = ""
+  type        = string
+  sensitive   = true
+  default     = ""
   # Require a non-empty password only when RDS is being created
   validation {
     condition     = var.create_rds ? length(trimspace(var.master_password)) > 0 : true
@@ -147,3 +147,43 @@ variable "s3_data_prefixes" {
   default = ["bronze/", "silver/", "gold/"]
 }
 
+# Glue Job Configuration
+variable "glue_job_worker_type" {
+  description = "The type of worker that your Glue job is configured to use."
+  type        = string
+  default     = "G.1X"
+  validation {
+    condition     = contains(["Standard", "G.1X", "G.2X", "G.025X", "Z.2X"], var.glue_job_worker_type)
+    error_message = "Invalid Glue job worker type. Must be one of: Standard, G.1X, G.2X, G.025X, Z.2X."
+  }
+}
+
+variable "glue_job_number_of_workers" {
+  description = "The number of workers of a given worker type that are allocated to the job."
+  type        = number
+  default     = 2
+  validation {
+    condition     = var.glue_job_number_of_workers >= 1
+    error_message = "Number of workers must be at least 1."
+  }
+}
+
+# S3 Data Paths for Glue Job Arguments
+variable "bronze_transactions_path" {
+  description = "S3 path to the Bronze layer transactions (e.g., 'bronze/transactions/yellow_taxi/')."
+  type        = string
+  default     = "bronze/transactions/yellow_taxi/"
+}
+
+# Paths for Delta Lake tables, used by delta_target crawlers and Glue jobs
+variable "silver_delta_table_path" {
+  description = "S3 path suffix for the Silver layer Delta table (e.g., 'silver/yellow_taxi')."
+  type        = string
+  default     = "silver/yellow_taxi"
+}
+
+variable "gold_delta_table_path" {
+  description = "S3 path suffix for the Gold layer Delta table (e.g., 'gold/yellow_taxi')."
+  type        = string
+  default     = "gold/yellow_taxi"
+}
