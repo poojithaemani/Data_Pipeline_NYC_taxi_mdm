@@ -19,20 +19,20 @@ DELETE FROM vendors WHERE vendor_id = :test_vendor_id;
 
 -- Test 1: Insert new record
 -- Expect: one row inserted with version = 1, is_current = TRUE
-CALL sp_upsert_vendor(:test_vendor_id, 'Test Vendor', :'hash_v1', NULL, NULL);
+CALL sp_upsert_vendor(:test_vendor_id, 'Test Vendor','hash_v1', NULL, NULL);
 SELECT vendor_row_id, vendor_id, vendor_name, record_hash, version, is_current, effective_date, end_date
 FROM vendors WHERE vendor_id = :test_vendor_id ORDER BY created_at;
 
 -- Test 2: Same record_hash -> NO_CHANGE
 -- Expect: still one current row with version = 1
-CALL sp_upsert_vendor(:test_vendor_id, 'Test Vendor', :'hash_v1', NULL, NULL);
+CALL sp_upsert_vendor(:test_vendor_id, 'Test Vendor','hash_v1', NULL, NULL);
 SELECT COUNT(*) AS total_rows, SUM(CASE WHEN is_current THEN 1 ELSE 0 END) AS current_count,
        MAX(version) AS max_version
 FROM vendors WHERE vendor_id = :test_vendor_id;
 
 -- Test 3: Different record_hash -> new version
 -- Expect: previous row expired (is_current = FALSE), new row inserted with version = 2
-CALL sp_upsert_vendor(:test_vendor_id, 'Test Vendor Updated', :'hash_v2', NULL, NULL);
+CALL sp_upsert_vendor(:test_vendor_id, 'Test Vendor Updated', 'hash_v2', NULL, NULL);
 SELECT vendor_row_id, vendor_id, vendor_name, record_hash, version, is_current, effective_date, end_date
 FROM vendors WHERE vendor_id = :test_vendor_id ORDER BY version;
 
