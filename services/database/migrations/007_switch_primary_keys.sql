@@ -47,11 +47,31 @@ BEGIN
 END
 $$;
 
--- 3) Switch vendors primary key to vendor_row_id
+-- 3) Add UNIQUE constraint to vendors.vendor_id (business key)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'vendors'::regclass AND contype = 'u' AND conname = 'vendors_vendor_id_key') THEN
+    ALTER TABLE vendors ADD CONSTRAINT vendors_vendor_id_key UNIQUE (vendor_id);
+  END IF;
+END
+$$;
+
+-- 4) Switch vendors primary key to vendor_row_id
 ALTER TABLE vendors DROP CONSTRAINT IF EXISTS vendors_pkey;
 ALTER TABLE vendors ADD CONSTRAINT vendors_pkey PRIMARY KEY (vendor_row_id);
 
--- 4) Switch golden_zones primary key to golden_zone_row_id
+-- 5) Add UNIQUE constraint to golden_zones.golden_id (business key)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = 'golden_zones'::regclass AND contype = 'u' AND conname = 'golden_zones_golden_id_key') THEN
+    -- Ensure golden_id is NOT NULL before adding UNIQUE, though SERIAL implies NOT NULL.
+    ALTER TABLE golden_zones ALTER COLUMN golden_id SET NOT NULL;
+    ALTER TABLE golden_zones ADD CONSTRAINT golden_zones_golden_id_key UNIQUE (golden_id);
+  END IF;
+END
+$$;
+
+-- 6) Switch golden_zones primary key to golden_zone_row_id
 ALTER TABLE golden_zones DROP CONSTRAINT IF EXISTS golden_zones_pkey;
 ALTER TABLE golden_zones ADD CONSTRAINT golden_zones_pkey PRIMARY KEY (golden_zone_row_id);
 
