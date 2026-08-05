@@ -37,11 +37,11 @@ BEGIN
     -- 2. Validate the replacement partial unique indexes exist, providing specific errors.
     -- This is critical. Do not drop the global unique constraint until its replacement is in place.
     IF to_regclass('public.idx_vendors_vendorid_current') IS NULL THEN
-        RAISE EXCEPTION 'Prerequisite failed: Missing required index `idx_vendors_vendorid_current`.';
+        RAISE EXCEPTION 'Prerequisite failed: Missing required index idx_vendors_vendorid_current.';
     END IF;
 
-    IF to_regclass('public.idx_golden_zones_locationid_current') IS NULL THEN
-        RAISE EXCEPTION 'Prerequisite failed: Missing required index `idx_golden_locationid_current`.';
+    IF to_regclass('public.idx_golden_locationid_current') IS NULL THEN
+        RAISE EXCEPTION 'Prerequisite failed: Missing required index idx_golden_locationid_current.';
     END IF;
 
     -- 3. Drop legacy UNIQUE constraints that conflict with SCD Type 2 logic.
