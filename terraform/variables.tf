@@ -175,6 +175,12 @@ variable "bronze_transactions_path" {
   default     = "bronze/transactions/yellow_taxi/"
 }
 
+variable "bronze_vendors_path" {
+  description = "S3 path to the Bronze layer vendors CSV file (e.g., 'bronze/vendors/')."
+  type        = string
+  default     = "bronze/vendors/"
+}
+
 # Paths for Delta Lake tables, used by delta_target crawlers and Glue jobs
 variable "silver_delta_table_path" {
   description = "S3 path suffix for the Silver layer Delta table (e.g., 'silver/yellow_taxi')."

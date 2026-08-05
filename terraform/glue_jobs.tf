@@ -31,6 +31,19 @@ resource "aws_s3_object" "gold_etl_script" {
   }
 }
 
+resource "aws_s3_object" "vendor_etl_script" {
+  bucket = var.bucket_name
+  key    = "glue/scripts/vendor_etl.py"
+  source = "${path.module}/../pipeline/glue/jobs/vendor_etl.py"
+  etag   = filemd5("${path.module}/../pipeline/glue/jobs/vendor_etl.py")
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
 resource "aws_s3_object" "glue_temp_dir" {
   bucket  = var.bucket_name
   key     = "glue/temp/"
@@ -89,6 +102,36 @@ resource "aws_glue_job" "silver_etl" {
 
   tags = {
     Name        = "${var.project_name}-yellow-taxi-silver-etl"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_glue_job" "vendor_etl" {
+  name              = "${var.project_name}-vendor-etl"
+  role_arn          = aws_iam_role.glue_role.arn
+  glue_version      = "4.0"
+  worker_type       = var.glue_job_worker_type
+  number_of_workers = var.glue_job_number_of_workers
+
+  command {
+    name            = "glueetl"
+    python_version  = "3"
+    script_location = "s3://${aws_s3_object.vendor_etl_script.bucket}/${aws_s3_object.vendor_etl_script.key}"
+  }
+
+  default_arguments = merge(
+    local.common_glue_job_args,
+    {
+      "--input_path"                = "s3://${var.bucket_name}/${var.bronze_vendors_path}vendors.csv"
+      "--secret_arn"                = var.create_rds ? module.rds[0].master_user_secret_arn : ""
+      "--additional-python-modules" = "pyarrow>=15.0.0,pg8000" # Override for this job only
+    }
+  )
+
+  tags = {
+    Name        = "${var.project_name}-vendor-etl"
     Project     = var.project_name
     Environment = var.environment
     ManagedBy   = "Terraform"

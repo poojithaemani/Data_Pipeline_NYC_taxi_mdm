@@ -83,3 +83,7 @@ output "silver_etl_job_name" {
 output "gold_etl_job_name" {
   value = aws_glue_job.gold_etl.name
 }
+
+output "vendor_etl_job_name" {
+  value = aws_glue_job.vendor_etl.name
+}
