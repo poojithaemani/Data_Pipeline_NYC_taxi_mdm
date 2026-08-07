@@ -124,8 +124,13 @@ resource "aws_glue_job" "vendor_etl" {
   default_arguments = merge(
     local.common_glue_job_args,
     {
-      "--input_path"                = "s3://${var.bucket_name}/${var.bronze_vendors_path}vendors.csv"
-      "--secret_arn"                = var.create_rds ? module.rds[0].master_user_secret_arn : ""
+      "--input_path" = "s3://${var.bucket_name}/${var.bronze_vendors_path}vendors.csv"
+      # Pass DB connection details directly if RDS is created. The script will use these if secret_arn is missing.
+      "--DB_HOST"     = var.create_rds ? module.rds[0].db_address : ""
+      "--DB_PORT"     = var.create_rds ? module.rds[0].db_port : ""
+      "--DB_NAME"     = var.database_name
+      "--DB_USER"     = var.master_username
+      "--DB_PASSWORD" = var.master_password
       "--additional-python-modules" = "pyarrow>=15.0.0,pg8000" # Override for this job only
     }
   )
