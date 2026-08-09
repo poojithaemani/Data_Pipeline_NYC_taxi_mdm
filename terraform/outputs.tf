@@ -84,6 +84,6 @@ output "gold_etl_job_name" {
   value = aws_glue_job.gold_etl.name
 }
 
-output "vendor_etl_job_name" {
-  value = aws_glue_job.vendor_etl.name
+output "golden_zone_etl_job_name" {
+  value = aws_glue_job.golden_zone_etl.name
 }

@@ -4,6 +4,10 @@ Database SCD Type 2
 
 This README documents the Phase SCD Type 2 schema changes for the master database. It explains why surrogate keys are introduced, why existing business keys are preserved, the migration sequence, safe execution steps, and how this prepares the project for stored procedures, Glue SCD jobs, and Step Functions.
 
+## Project Scope
+
+The SCD Type 2 implementation focuses on `golden_zones`, which is the authoritative master data entity in this project. This design reflects the available NYC Taxi datasets, where Taxi Zones provide descriptive master data while VendorID exists only as a reference code within transactional records.
+
 ## Why surrogate row keys are introduced
 
 - Surrogate row keys (vendor_row_id, golden_zone_row_id) provide a stable, single-column primary key for each row version.
@@ -45,8 +49,8 @@ This README documents the Phase SCD Type 2 schema changes for the master databas
 
 ## How this prepares the project for next phases
 
-- Stored Procedures (Phase 3B): The SCD columns and surrogate keys enable concise, single-transaction stored procedures to perform SCD upserts (close previous version, insert new version, set version numbers).
-- Glue PySpark SCD Job (Phase 3C): Glue can detect changes using business keys (vendor_id/location_id) and call stored procedures or perform idempotent upserts into the master DB. Surrogate PKs keep inserts simple.
+- Stored Procedures (Phase 3B): The SCD columns and surrogate keys for `golden_zones` enable concise, single-transaction stored procedures to perform SCD upserts.
+- Glue PySpark SCD Job (Phase 3C): Glue can detect changes in `golden_zones` using the business key (`location_id`) and call the corresponding stored procedure.
 - Step Functions (Phase 5): Orchestrations can rely on clear semantics (is_current/effective_date/end_date) and partial unique indexes to coordinate state transitions safely.
 
 ## Contact / Runbook
@@ -57,4 +61,4 @@ This README documents the Phase SCD Type 2 schema changes for the master databas
 
 ## Concise rationale
 
-Surrogate keys + preserved business keys provide the minimal, maintainable path to SCD Type 2 that integrates cleanly with existing AWS Glue and Athena pipelines, minimizes consumer impact, and supports robust, atomic SCD upserts using stored procedures.
+For `golden_zones`, using surrogate keys with preserved business keys provides a maintainable path to SCD Type 2 that integrates cleanly with the AWS data pipeline and supports robust, atomic upserts via stored procedures.

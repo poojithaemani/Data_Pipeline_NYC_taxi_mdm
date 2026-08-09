@@ -31,11 +31,11 @@ resource "aws_s3_object" "gold_etl_script" {
   }
 }
 
-resource "aws_s3_object" "vendor_etl_script" {
+resource "aws_s3_object" "golden_zone_etl_script" {
   bucket = var.bucket_name
-  key    = "glue/scripts/vendor_etl.py"
-  source = "${path.module}/../pipeline/glue/jobs/vendor_etl.py"
-  etag   = filemd5("${path.module}/../pipeline/glue/jobs/vendor_etl.py")
+  key    = "glue/scripts/golden_zone_etl.py"
+  source = "${path.module}/../pipeline/glue/jobs/golden_zone_etl.py"
+  etag   = filemd5("${path.module}/../pipeline/glue/jobs/golden_zone_etl.py")
 
   tags = {
     Project     = var.project_name
@@ -108,8 +108,8 @@ resource "aws_glue_job" "silver_etl" {
   }
 }
 
-resource "aws_glue_job" "vendor_etl" {
-  name              = "${var.project_name}-vendor-etl"
+resource "aws_glue_job" "golden_zone_etl" {
+  name              = "${var.project_name}-golden-zone-etl"
   role_arn          = aws_iam_role.glue_role.arn
   glue_version      = "4.0"
   worker_type       = var.glue_job_worker_type
@@ -118,25 +118,30 @@ resource "aws_glue_job" "vendor_etl" {
   command {
     name            = "glueetl"
     python_version  = "3"
-    script_location = "s3://${aws_s3_object.vendor_etl_script.bucket}/${aws_s3_object.vendor_etl_script.key}"
+    script_location = "s3://${aws_s3_object.golden_zone_etl_script.bucket}/${aws_s3_object.golden_zone_etl_script.key}"
   }
 
   default_arguments = merge(
     local.common_glue_job_args,
     {
-      "--input_path" = "s3://${var.bucket_name}/${var.bronze_vendors_path}vendors.csv"
-      # Pass DB connection details directly if RDS is created. The script will use these if secret_arn is missing.
+      # This job needs the pg8000 library to connect to PostgreSQL
+      "--additional-python-modules" = "pyarrow>=15.0.0,pg8000"
+      # Must match the key written by the ingestion pipeline
+      # (pipeline/ingestion/orchestrator.py -> bronze/reference/<source>/<source>.csv)
+      "--input_path" = "s3://${var.bucket_name}/${var.bronze_reference_path}taxi_zones/taxi_zones.csv"
+
+      # Following the existing pattern of passing DB credentials as arguments.
+      # This will be enhanced later with Secrets Manager.
       "--DB_HOST"     = var.create_rds ? module.rds[0].db_address : ""
       "--DB_PORT"     = var.create_rds ? module.rds[0].db_port : ""
       "--DB_NAME"     = var.database_name
       "--DB_USER"     = var.master_username
       "--DB_PASSWORD" = var.master_password
-      "--additional-python-modules" = "pyarrow>=15.0.0,pg8000" # Override for this job only
     }
   )
 
   tags = {
-    Name        = "${var.project_name}-vendor-etl"
+    Name        = "${var.project_name}-golden-zone-etl"
     Project     = var.project_name
     Environment = var.environment
     ManagedBy   = "Terraform"

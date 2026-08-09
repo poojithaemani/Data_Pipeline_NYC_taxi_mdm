@@ -25,67 +25,59 @@
                                |
                     AWS Glue ETL Jobs
                                |
-         +---------------------+----------------------+
-         |                                            |
-         |                                            |
-         v                                            v
-
-+------------------------+ +------------------------+
-| Vendor ETL | | Golden Zone ETL |
-| vendor_etl.py | | golden_zone_etl.py |
-+-----------+------------+ +-----------+------------+
-| |
-| |
-Read CSV Read CSV
-Clean Data Clean Data
-Generate Hash Generate Hash
-| |
-+------------------+----------------------+
-|
-|
-v
-+----------------------+
-| Aurora PostgreSQL |
-|----------------------|
-| Stored Procedures |
-| |
-| sp_upsert_vendor() |
-| sp_upsert_golden() |
-+----------+-----------+
-|
-|
-v
-+-----------------------------+
-| MDM Database |
-|-----------------------------|
-| vendors |
-| golden_zones |
-| taxi_zones |
-| zone_matches |
-| SCD Type 2 History |
-+----------+------------------+
-|
-|
-Glue Crawlers
-|
-v
-+-----------------------------+
-| AWS Glue Catalog |
-| Gold Tables |
-+-------------+---------------+
-|
-|
-+----------+-----------+
-| Amazon Athena |
-| SQL Analytics |
-+----------+-----------+
-|
-|
-v
-+----------------------+
-| Amazon QuickSight |
-| Dashboards |
-+----------------------+
+                               v
+                    +------------------------+
+                    |    Golden Zone ETL     |
+                    |  golden_zone_etl.py    |
+                    +-----------+------------+
+                               |
+                               |
+                            Read CSV
+                            Clean Data
+                            Generate Hash
+                               |
+                               |
+                               v
+                    +----------------------+
+                    | Aurora PostgreSQL    |
+                    |----------------------|
+                    | Stored Procedures    |
+                    |                      |
+                    | sp_upsert_golden()   |
+                    +----------+-----------+
+                               |
+                               |
+                               v
+                    +-----------------------------+
+                    | MDM Database                |
+                    |-----------------------------|
+                    | golden_zones                |
+                    | taxi_zones                  |
+                    | zone_matches                |
+                    | SCD Type 2 History          |
+                    +----------+------------------+
+                               |
+                               |
+                          Glue Crawlers
+                               |
+                               v
+                    +-----------------------------+
+                    | AWS Glue Catalog            |
+                    | Gold Tables                 |
+                    +-------------+---------------+
+                               |
+                               |
+                    +----------+-----------+
+                    | Amazon Athena       |
+                    | SQL Analytics       |
+                    +----------+-----------+
+                               |
+                               |
+                               v
+                    +----------------------+
+                    | Amazon QuickSight    |
+                    | Dashboards           |
+                    +----------------------+
 
 This architecture consists of two main data flows:
 
@@ -122,11 +114,11 @@ graph TD
         subgraph "Ingestion & Mastering"
             Ingestion_Orchestrator("Ingestion Orchestrator<br/>(Python)")
             S3_Bronze_R["S3 Bronze (Raw)"]
-            Glue_ETL_MDM["Glue ETL (PySpark)<br/>- SCD Type 2 Logic<br/>- Calls Stored Procs"]
-            RDS_PG["RDS PostgreSQL<br/>(Master Data - SCD2)"]
+            Glue_ETL_GoldenZone["Glue ETL (PySpark)<br/>- Golden Zone SCD Type 2 Logic<br/>- Calls sp_upsert_golden_zone"]
+            RDS_PG["RDS PostgreSQL<br/>(Golden Zones - SCD2)"]
         end
         Ref_Sources --> Ingestion_Orchestrator --> S3_Bronze_R
-        S3_Bronze_R --> Glue_ETL_MDM --> RDS_PG
+        S3_Bronze_R --> Glue_ETL_GoldenZone --> RDS_PG
     end
 
     subgraph "Data Serving & Analytics"
