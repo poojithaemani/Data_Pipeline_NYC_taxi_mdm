@@ -30,6 +30,42 @@ output "rds_security_group" {
   description = "RDS security group id (empty when create_rds = false)"
 }
 
+# Redshift Serverless outputs
+output "redshift_namespace" {
+  value       = var.create_redshift ? module.redshift[0].namespace_name : null
+  description = "Redshift Serverless namespace (null when create_redshift = false)"
+}
+
+output "redshift_workgroup" {
+  value       = var.create_redshift ? module.redshift[0].workgroup_name : null
+  description = "Redshift Serverless workgroup (null when create_redshift = false)"
+}
+
+output "redshift_database" {
+  value       = var.create_redshift ? module.redshift[0].database_name : null
+  description = "Redshift Serverless database name"
+}
+
+output "redshift_endpoint" {
+  value       = var.create_redshift ? module.redshift[0].endpoint_address : null
+  description = "Redshift Serverless endpoint address"
+}
+
+output "redshift_port" {
+  value       = var.create_redshift ? module.redshift[0].endpoint_port : null
+  description = "Redshift Serverless endpoint port"
+}
+
+output "redshift_iam_role_arn" {
+  value       = var.create_redshift ? module.redshift[0].iam_role_arn : null
+  description = "ARN of the dedicated Redshift IAM role"
+}
+
+output "redshift_security_group" {
+  value       = var.create_redshift ? module.redshift[0].security_group_id : null
+  description = "Redshift Serverless security group id"
+}
+
 # Phase 2 outputs - Glue Catalog & Crawlers & Athena
 output "glue_bronze_db" {
   value = aws_glue_catalog_database.bronze.name

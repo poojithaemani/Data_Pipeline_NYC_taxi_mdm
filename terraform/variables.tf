@@ -77,6 +77,74 @@ variable "create_rds" {
   description = "Whether to create RDS infrastructure"
 }
 
+################################################################################
+# Redshift Serverless
+#
+# Reuses the existing VPC. redshift_subnet_ids is intentionally separate from
+# subnet_ids (consumed by RDS) because Redshift Serverless requires subnets in
+# at least three Availability Zones.
+################################################################################
+
+variable "create_redshift" {
+  description = "Whether to create Redshift Serverless infrastructure"
+  type        = bool
+  default     = true
+}
+
+variable "redshift_subnet_ids" {
+  description = "Subnet IDs for the Redshift Serverless workgroup. Must span at least three AZs."
+  type        = list(string)
+}
+
+variable "redshift_namespace_name" {
+  description = "Redshift Serverless namespace name"
+  type        = string
+  default     = "nyc-taxi-mdm"
+}
+
+variable "redshift_workgroup_name" {
+  description = "Redshift Serverless workgroup name"
+  type        = string
+  default     = "nyc-taxi-mdm-wg"
+}
+
+variable "redshift_database_name" {
+  description = "Initial database created in the Redshift Serverless namespace"
+  type        = string
+  default     = "taxi_analytics"
+}
+
+variable "redshift_iam_role_name" {
+  description = "Name of the dedicated IAM role assumed by Redshift"
+  type        = string
+  default     = "nyc-taxi-mdm-redshift-role"
+}
+
+variable "redshift_admin_username" {
+  description = "Redshift Serverless admin username"
+  type        = string
+  sensitive   = true
+  default     = "redshift_admin"
+}
+
+variable "redshift_admin_password" {
+  description = "Redshift Serverless admin password. Supplied via terraform.tfvars (gitignored)."
+  type        = string
+  sensitive   = true
+}
+
+variable "redshift_base_capacity" {
+  description = "Base capacity in RPUs. Minimum valid value is 8."
+  type        = number
+  default     = 8
+}
+
+variable "redshift_publicly_accessible" {
+  description = "Whether the Redshift Serverless workgroup is publicly accessible"
+  type        = bool
+  default     = false
+}
+
 # Glue catalog database names
 variable "bronze_db_name" {
   type    = string
