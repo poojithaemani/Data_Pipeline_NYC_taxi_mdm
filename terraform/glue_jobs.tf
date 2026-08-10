@@ -44,6 +44,19 @@ resource "aws_s3_object" "golden_zone_etl_script" {
   }
 }
 
+resource "aws_s3_object" "warehouse_export_script" {
+  bucket = var.bucket_name
+  key    = "glue/scripts/warehouse_export_etl.py"
+  source = "${path.module}/../pipeline/glue/jobs/warehouse_export_etl.py"
+  etag   = filemd5("${path.module}/../pipeline/glue/jobs/warehouse_export_etl.py")
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
 resource "aws_s3_object" "glue_temp_dir" {
   bucket  = var.bucket_name
   key     = "glue/temp/"
@@ -171,6 +184,57 @@ resource "aws_glue_job" "gold_etl" {
 
   tags = {
     Name        = "${var.project_name}-yellow-taxi-gold-etl"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+################################################################################
+# Warehouse Export ETL
+#
+# Builds the Redshift-ready star schema snapshot as plain Parquet under the
+# warehouse/ prefix. Redshift COPY cannot read Delta Lake, so this export is
+# required regardless; producing a separate dataset leaves the Silver and Gold
+# Delta tables and their jobs completely untouched.
+#
+# Reads Silver (S3) and the mastered zone records (RDS), so it needs the same
+# DB_* arguments as the golden zone job.
+################################################################################
+
+resource "aws_glue_job" "warehouse_export_etl" {
+  name              = "${var.project_name}-warehouse-export-etl"
+  role_arn          = aws_iam_role.glue_role.arn
+  glue_version      = "4.0"
+  worker_type       = var.glue_job_worker_type
+  number_of_workers = var.glue_job_number_of_workers
+
+  command {
+    name            = "glueetl"
+    python_version  = "3"
+    script_location = "s3://${aws_s3_object.warehouse_export_script.bucket}/${aws_s3_object.warehouse_export_script.key}"
+  }
+
+  default_arguments = merge(
+    local.common_glue_job_args,
+    {
+      # pg8000 is needed to read dim_zone from PostgreSQL, as in the golden zone job.
+      "--additional-python-modules" = "pyarrow>=15.0.0,pg8000"
+
+      "--silver_path"    = "s3://${var.bucket_name}/${var.silver_delta_table_path}/"
+      "--warehouse_path" = "s3://${var.bucket_name}/${var.warehouse_path}"
+
+      # Same credential-passing pattern as the golden zone job.
+      "--DB_HOST"     = var.create_rds ? module.rds[0].db_address : ""
+      "--DB_PORT"     = var.create_rds ? module.rds[0].db_port : ""
+      "--DB_NAME"     = var.database_name
+      "--DB_USER"     = var.master_username
+      "--DB_PASSWORD" = var.master_password
+    }
+  )
+
+  tags = {
+    Name        = "${var.project_name}-warehouse-export-etl"
     Project     = var.project_name
     Environment = var.environment
     ManagedBy   = "Terraform"

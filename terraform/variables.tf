@@ -261,3 +261,9 @@ variable "gold_delta_table_path" {
   type        = string
   default     = "gold/yellow_taxi"
 }
+
+variable "warehouse_path" {
+  description = "S3 path suffix for the Redshift-ready Parquet warehouse snapshot (e.g., 'warehouse')."
+  type        = string
+  default     = "warehouse"
+}

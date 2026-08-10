@@ -156,4 +156,18 @@ resource "aws_redshiftserverless_workgroup" "this" {
   tags = {
     Name = var.workgroup_name
   }
+
+  # AWS returns the complete set of workgroup config parameters on every read,
+  # including service-managed defaults this module never sets (auto_mv,
+  # datestyle, enable_user_activity_logging, max_query_execution_time, etc.).
+  # The provider models config_parameter as an exhaustive set, so those
+  # defaults appear as removals on every plan and the resource can never
+  # converge. Ignoring changes here is the only stable resolution.
+  #
+  # This does not weaken the SSL requirement: ignore_changes applies to
+  # updates only, so the config_parameter block above is still applied when
+  # the workgroup is created.
+  lifecycle {
+    ignore_changes = [config_parameter]
+  }
 }
