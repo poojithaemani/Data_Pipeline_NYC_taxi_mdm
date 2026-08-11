@@ -43,6 +43,7 @@ JOB_NAMES = [
     "nyc-taxi-mdm-platform-golden-zone-etl",
     "nyc-taxi-mdm-platform-yellow-taxi-silver-etl",
     "nyc-taxi-mdm-platform-yellow-taxi-gold-etl",
+    "nyc-taxi-mdm-platform-warehouse-export-etl",
 ]
 
 TERMINAL_STATES = {"SUCCEEDED", "FAILED", "ERROR", "TIMEOUT", "STOPPED"}

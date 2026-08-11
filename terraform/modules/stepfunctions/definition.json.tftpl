@@ -1,0 +1,364 @@
+{
+  "Comment": "NYC Taxi MDM end-to-end pipeline. Silver -> Gold -> Golden Zone -> Warehouse Export -> Redshift COPY -> QuickSight SPICE refresh. Strictly sequential: warehouse_export_etl reads both the Silver Delta table and the mastered zones in RDS, and the Redshift COPY reads the warehouse snapshot, so every stage must reach a terminal success before the next starts.",
+  "StartAt": "SilverETL",
+  "TimeoutSeconds": ${pipeline_timeout_seconds},
+  "States": {
+
+    "SilverETL": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${silver_job_name}"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": ["Glue.ConcurrentRunsExceededException"],
+          "IntervalSeconds": 60,
+          "MaxAttempts": 5,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": ["Glue.AWSGlueException", "States.Timeout"],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "GoldETL"
+    },
+
+    "GoldETL": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${gold_job_name}"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": ["Glue.ConcurrentRunsExceededException"],
+          "IntervalSeconds": 60,
+          "MaxAttempts": 5,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": ["Glue.AWSGlueException", "States.Timeout"],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "GoldenZoneETL"
+    },
+
+    "GoldenZoneETL": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${golden_zone_job_name}"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": ["Glue.ConcurrentRunsExceededException"],
+          "IntervalSeconds": 60,
+          "MaxAttempts": 5,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": ["Glue.AWSGlueException", "States.Timeout"],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "WarehouseExport"
+    },
+
+    "WarehouseExport": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${warehouse_export_job_name}"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": ["Glue.ConcurrentRunsExceededException"],
+          "IntervalSeconds": 60,
+          "MaxAttempts": 5,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": ["Glue.AWSGlueException", "States.Timeout"],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "StartRedshiftCopy"
+    },
+
+    "StartRedshiftCopy": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:redshiftdata:batchExecuteStatement",
+      "Comment": "Statements are read verbatim from services/redshift/load/02_copy_from_s3.sql at plan time, so that file stays the single source of truth for the load.",
+      "Parameters": {
+        "WorkgroupName": "${redshift_workgroup_name}",
+        "Database": "${redshift_database}",
+        "StatementName": "${state_machine_name}-copy",
+        "Sqls": ${copy_statements_json}
+      },
+      "ResultSelector": {
+        "Id.$": "$.Id"
+      },
+      "ResultPath": "$.redshift",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Redshiftdata.ActiveStatementsExceededException",
+            "Redshiftdata.InternalServerException"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "WaitForRedshiftCopy"
+    },
+
+    "WaitForRedshiftCopy": {
+      "Type": "Wait",
+      "Seconds": ${redshift_poll_seconds},
+      "Next": "CheckRedshiftCopy"
+    },
+
+    "CheckRedshiftCopy": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:redshiftdata:describeStatement",
+      "Parameters": {
+        "Id.$": "$.redshift.Id"
+      },
+      "ResultSelector": {
+        "Id.$": "$.Id",
+        "Status.$": "$.Status"
+      },
+      "ResultPath": "$.redshift",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 10,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "RedshiftCopyComplete"
+    },
+
+    "RedshiftCopyComplete": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.redshift.Status",
+          "StringEquals": "FINISHED",
+          "Next": "StartSpiceRefresh"
+        },
+        {
+          "Or": [
+            { "Variable": "$.redshift.Status", "StringEquals": "FAILED" },
+            { "Variable": "$.redshift.Status", "StringEquals": "ABORTED" }
+          ],
+          "Next": "RedshiftCopyFailed"
+        }
+      ],
+      "Default": "WaitForRedshiftCopy"
+    },
+
+    "RedshiftCopyFailed": {
+      "Type": "Pass",
+      "Parameters": {
+        "Cause": "Redshift COPY did not reach FINISHED.",
+        "Stage": "StartRedshiftCopy",
+        "Status.$": "$.redshift.Status",
+        "StatementId.$": "$.redshift.Id"
+      },
+      "ResultPath": "$.error",
+      "Next": "NotifyFailure"
+    },
+
+    "StartSpiceRefresh": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:quicksight:createIngestion",
+      "Comment": "Refreshes the existing SPICE dataset. Nothing about the dataset, analysis or dashboard is recreated.",
+      "Parameters": {
+        "AwsAccountId": "${aws_account_id}",
+        "DataSetId": "${quicksight_dataset_id}",
+        "IngestionId.$": "States.Format('sfn-{}', States.UUID())"
+      },
+      "ResultSelector": {
+        "IngestionId.$": "$.IngestionId"
+      },
+      "ResultPath": "$.spice",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "QuickSight.ThrottlingException",
+            "QuickSight.InternalFailureException"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "WaitForSpiceRefresh"
+    },
+
+    "WaitForSpiceRefresh": {
+      "Type": "Wait",
+      "Seconds": ${spice_poll_seconds},
+      "Next": "CheckSpiceRefresh"
+    },
+
+    "CheckSpiceRefresh": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:quicksight:describeIngestion",
+      "Parameters": {
+        "AwsAccountId": "${aws_account_id}",
+        "DataSetId": "${quicksight_dataset_id}",
+        "IngestionId.$": "$.spice.IngestionId"
+      },
+      "ResultSelector": {
+        "IngestionId.$": "$.Ingestion.IngestionId",
+        "Status.$": "$.Ingestion.IngestionStatus"
+      },
+      "ResultPath": "$.spice",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 10,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "NotifyFailure"
+        }
+      ],
+      "Next": "SpiceRefreshComplete"
+    },
+
+    "SpiceRefreshComplete": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.spice.Status",
+          "StringEquals": "COMPLETED",
+          "Next": "PipelineSucceeded"
+        },
+        {
+          "Or": [
+            { "Variable": "$.spice.Status", "StringEquals": "FAILED" },
+            { "Variable": "$.spice.Status", "StringEquals": "CANCELLED" }
+          ],
+          "Next": "SpiceRefreshFailed"
+        }
+      ],
+      "Default": "WaitForSpiceRefresh"
+    },
+
+    "SpiceRefreshFailed": {
+      "Type": "Pass",
+      "Parameters": {
+        "Cause": "QuickSight SPICE ingestion did not reach COMPLETED.",
+        "Stage": "StartSpiceRefresh",
+        "Status.$": "$.spice.Status",
+        "IngestionId.$": "$.spice.IngestionId"
+      },
+      "ResultPath": "$.error",
+      "Next": "NotifyFailure"
+    },
+
+    "NotifyFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "${sns_topic_arn}",
+        "Subject": "FAILED: ${state_machine_name}",
+        "Message.$": "States.Format('State machine ${state_machine_name} execution {} failed. Detail: {}', $$.Execution.Name, States.JsonToString($.error))"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 5,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "PipelineFailed"
+    },
+
+    "PipelineFailed": {
+      "Type": "Fail",
+      "Error": "PipelineFailed",
+      "Cause": "A pipeline stage failed. See the SNS notification and the execution history for the failing stage."
+    },
+
+    "PipelineSucceeded": {
+      "Type": "Succeed"
+    }
+  }
+}

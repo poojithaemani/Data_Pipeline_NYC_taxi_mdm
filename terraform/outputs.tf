@@ -123,3 +123,44 @@ output "gold_etl_job_name" {
 output "golden_zone_etl_job_name" {
   value = aws_glue_job.golden_zone_etl.name
 }
+# Was missing while the other three Glue jobs were exported. Added with the
+# orchestration batch so every deployed job has an output.
+output "warehouse_export_etl_job_name" {
+  value = aws_glue_job.warehouse_export_etl.name
+}
+
+# Orchestration and observability
+output "pipeline_state_machine_arn" {
+  value       = var.create_orchestration ? module.stepfunctions[0].state_machine_arn : null
+  description = "ARN of the end-to-end pipeline state machine"
+}
+
+output "pipeline_state_machine_name" {
+  value       = var.create_orchestration ? module.stepfunctions[0].state_machine_name : null
+  description = "Name of the end-to-end pipeline state machine"
+}
+
+output "pipeline_state_machine_log_group" {
+  value       = var.create_orchestration ? module.stepfunctions[0].log_group_name : null
+  description = "Log group receiving state machine execution history"
+}
+
+output "pipeline_copy_statement_count" {
+  value       = var.create_orchestration ? module.stepfunctions[0].copy_statement_count : null
+  description = "Statements parsed from services/redshift/load/02_copy_from_s3.sql into the Redshift COPY stage"
+}
+
+output "alerts_topic_arn" {
+  value       = var.create_orchestration ? module.monitoring[0].alerts_topic_arn : null
+  description = "SNS topic for pipeline alarms and failure notifications"
+}
+
+output "monitoring_dashboard_name" {
+  value       = var.create_orchestration ? module.monitoring[0].dashboard_name : null
+  description = "CloudWatch dashboard for the pipeline"
+}
+
+output "monitoring_alarm_names" {
+  value       = var.create_orchestration ? module.monitoring[0].alarm_names : null
+  description = "CloudWatch alarms guarding the pipeline"
+}

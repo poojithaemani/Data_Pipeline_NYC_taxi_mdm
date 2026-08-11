@@ -267,3 +267,65 @@ variable "warehouse_path" {
   type        = string
   default     = "warehouse"
 }
+
+# ----------------------------------------------------------------------------
+# Orchestration and observability
+#
+# All additive. create_orchestration follows the create_rds / create_redshift
+# pattern already used above, so the layer can be stood down without touching
+# any other resource.
+# ----------------------------------------------------------------------------
+
+variable "create_orchestration" {
+  description = "Create the Step Functions state machine and the CloudWatch/SNS monitoring layer."
+  type        = bool
+  default     = true
+}
+
+variable "quicksight_dataset_id" {
+  description = "Existing QuickSight SPICE dataset refreshed at the end of the pipeline. Refreshed only - never created or modified by Terraform."
+  type        = string
+  default     = "nyc-taxi-trips-star"
+}
+
+variable "alert_email" {
+  description = "Optional email subscribed to the alerts topic. Requires out-of-band confirmation of the emailed link."
+  type        = string
+  default     = ""
+}
+
+variable "redshift_poll_seconds" {
+  description = "Interval between Redshift Data API status polls in the state machine."
+  type        = number
+  default     = 10
+}
+
+variable "spice_poll_seconds" {
+  description = "Interval between QuickSight ingestion status polls in the state machine."
+  type        = number
+  default     = 20
+}
+
+variable "pipeline_timeout_seconds" {
+  description = "Overall timeout for one state machine execution."
+  type        = number
+  default     = 5400
+}
+
+variable "pipeline_duration_alarm_ms" {
+  description = "Alarm threshold for a single pipeline execution's duration, in milliseconds."
+  type        = number
+  default     = 2700000
+}
+
+variable "glue_failed_tasks_threshold" {
+  description = "Reference line on the Glue task-failure dashboard chart. Not an alarm threshold - see terraform/modules/monitoring/main.tf for why CloudWatch cannot alarm on this metric."
+  type        = number
+  default     = 5
+}
+
+variable "redshift_compute_seconds_threshold" {
+  description = "Daily RPU-second ceiling for the Redshift Serverless workgroup, used as a cost guard."
+  type        = number
+  default     = 43200
+}
