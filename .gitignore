@@ -7,6 +7,9 @@
 *.tfstate.*
 *.tfvars
 terraform.tfvars.json
+# Plan files store sensitive values (e.g. DB_PASSWORD) in plaintext. The glob is
+# widened from *.tfplan so named plans such as tfplan.warehouse are also ignored.
+tfplan*
 *.tfplan
 crash.log
 override.tf
@@ -18,3 +21,13 @@ override.tf.json
 # Environment
 # ==============================
 /configs/.env
+
+# ==============================
+# Local AI-agent context
+#
+# These carry live AWS endpoints and plaintext credentials so a new Claude
+# session can pick the project up cold. This repository is PUBLIC - they must
+# never be committed.
+# ==============================
+CLAUDE.md
+BUILD.md
