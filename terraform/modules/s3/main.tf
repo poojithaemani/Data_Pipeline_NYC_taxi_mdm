@@ -67,7 +67,11 @@ locals {
     "quality/",
     "logs/",
     "metadata/",
-    "checkpoints/"
+    "checkpoints/",
+    # Required deliverable: the published master-data zone. Holds the mastered
+    # reference records that the MDM pipeline produces, kept separate from the
+    # transactional medallion layers.
+    "master/"
   ]
 }
 

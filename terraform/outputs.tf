@@ -216,3 +216,8 @@ output "s3_vpc_endpoint_id" {
   value       = var.create_orchestration ? module.network[0].s3_vpc_endpoint_id : null
   description = "S3 gateway endpoint keeping data-lake traffic off the NAT"
 }
+
+output "sync_pipeline_runs_job_name" {
+  value       = aws_glue_job.sync_pipeline_runs.name
+  description = "Glue Python Shell job that syncs Glue run history into pipeline_runs from inside the VPC"
+}

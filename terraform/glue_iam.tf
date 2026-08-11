@@ -77,6 +77,46 @@ data "aws_iam_policy_document" "glue_policy" {
     resources = [local.glue_log_group_arn]
   }
 
+  # The sync_pipeline_runs job mirrors Glue's own execution history into the
+  # pipeline_runs table, so it has to read that history back. Scoped to the
+  # four pipeline jobs it tracks.
+  statement {
+    sid    = "ReadPipelineJobRunHistory"
+    effect = "Allow"
+
+    actions = [
+      "glue:GetJobRun",
+      "glue:GetJobRuns",
+    ]
+
+    resources = [
+      for job in [
+        "${var.project_name}-yellow-taxi-silver-etl",
+        "${var.project_name}-yellow-taxi-gold-etl",
+        "${var.project_name}-golden-zone-etl",
+        "${var.project_name}-warehouse-export-etl",
+      ] : "arn:aws:glue:${var.aws_region}:${local.account_id}:job/${job}"
+    ]
+  }
+
+  # The same job parses records_processed out of the structured "Final job
+  # summary" line the ETL jobs write to the Glue continuous log group. Read
+  # only, and only that log group.
+  statement {
+    sid    = "ReadGlueJobLogs"
+    effect = "Allow"
+
+    actions = [
+      "logs:FilterLogEvents",
+      "logs:GetLogEvents",
+      "logs:DescribeLogStreams",
+    ]
+
+    resources = [
+      "arn:aws:logs:${var.aws_region}:${local.account_id}:log-group:/aws-glue/jobs/logs-v2:*",
+    ]
+  }
+
   # Security phase: the database password is no longer passed as a job
   # argument. The two database-facing jobs read this one secret at runtime.
   dynamic "statement" {
