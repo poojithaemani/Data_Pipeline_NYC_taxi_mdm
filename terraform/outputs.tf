@@ -164,3 +164,14 @@ output "monitoring_alarm_names" {
   value       = var.create_orchestration ? module.monitoring[0].alarm_names : null
   description = "CloudWatch alarms guarding the pipeline"
 }
+
+# Secrets - identifiers only, never the value.
+output "redshift_admin_secret_arn" {
+  value       = var.create_orchestration ? module.secrets[0].redshift_admin_secret_arn : null
+  description = "ARN of the Redshift admin secret used by the pipeline's Redshift Data API stage"
+}
+
+output "redshift_admin_secret_name" {
+  value       = var.create_orchestration ? module.secrets[0].redshift_admin_secret_name : null
+  description = "Name of the Redshift admin secret"
+}

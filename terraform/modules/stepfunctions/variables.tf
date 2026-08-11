@@ -70,6 +70,11 @@ variable "copy_sql_path" {
   type        = string
 }
 
+variable "redshift_secret_arn" {
+  description = "ARN of the Secrets Manager secret holding the Redshift admin username and password. The COPY stage authenticates with this instead of the state machine role's own IAM database identity, which cannot run ANALYZE because it does not own the warehouse tables. Only the ARN is passed - this module never reads or renders the secret value."
+  type        = string
+}
+
 variable "redshift_poll_seconds" {
   description = "Interval between Redshift Data API status polls. The measured COPY takes about 15 seconds in total."
   type        = number

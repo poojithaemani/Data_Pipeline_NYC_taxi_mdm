@@ -131,10 +131,11 @@
     "StartRedshiftCopy": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:redshiftdata:batchExecuteStatement",
-      "Comment": "Statements are read verbatim from services/redshift/load/02_copy_from_s3.sql at plan time, so that file stays the single source of truth for the load.",
+      "Comment": "Statements are read verbatim from services/redshift/load/02_copy_from_s3.sql at plan time, so that file stays the single source of truth for the load. SecretArn authenticates as the Redshift admin: the state machine role's own IAM database user can be granted TRUNCATE and COPY but never ANALYZE, which requires table ownership.",
       "Parameters": {
         "WorkgroupName": "${redshift_workgroup_name}",
         "Database": "${redshift_database}",
+        "SecretArn": "${redshift_secret_arn}",
         "StatementName": "${state_machine_name}-copy",
         "Sqls": ${copy_statements_json}
       },

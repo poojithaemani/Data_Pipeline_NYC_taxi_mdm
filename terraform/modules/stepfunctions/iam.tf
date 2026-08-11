@@ -80,16 +80,27 @@ data "aws_iam_policy_document" "sfn" {
     resources = ["*"]
   }
 
-  # Required for the Data API to obtain temporary credentials for the
-  # workgroup using this role's identity.
+  # The COPY stage authenticates with the Redshift admin credentials held in
+  # Secrets Manager, scoped to that one secret ARN. Read only - no write, no
+  # rotation, no listing, and no access to any other secret.
+  #
+  # The secret is encrypted with the AWS managed key for Secrets Manager, so
+  # no explicit kms:Decrypt grant is needed for a same-account caller. A
+  # customer managed key would require one.
   statement {
-    sid    = "RedshiftServerlessCredentials"
+    sid    = "ReadRedshiftAdminSecret"
     effect = "Allow"
 
-    actions = ["redshift-serverless:GetCredentials"]
+    actions = ["secretsmanager:GetSecretValue"]
 
-    resources = [data.aws_redshiftserverless_workgroup.this.arn]
+    resources = [var.redshift_secret_arn]
   }
+
+  # redshift-serverless:GetCredentials is deliberately NOT granted. It was
+  # required while the Data API minted temporary credentials from this role's
+  # own IAM identity; authenticating through the secret makes it unnecessary,
+  # and a security batch is the wrong place to leave a redundant
+  # credential-minting permission in place.
 
   # Refresh only. No permission to create, update or delete the dataset, the
   # analysis, the dashboard or the VPC connection.

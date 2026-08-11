@@ -58,6 +58,7 @@ locals {
     warehouse_export_job_name = var.warehouse_export_job_name
     redshift_workgroup_name   = var.redshift_workgroup_name
     redshift_database         = var.redshift_database
+    redshift_secret_arn       = var.redshift_secret_arn
     redshift_poll_seconds     = var.redshift_poll_seconds
     copy_statements_json      = jsonencode(local.copy_statements)
     aws_account_id            = local.account_id

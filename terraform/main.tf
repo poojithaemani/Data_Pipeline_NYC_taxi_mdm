@@ -83,6 +83,25 @@ module "rds" {
 }
 
 ############################################
+# Secrets
+#
+# Additive. Holds the Redshift admin credential that the state machine's
+# Redshift Data API calls authenticate with. Declared before the
+# orchestration modules, which consume the secret ARN.
+############################################
+
+module "secrets" {
+  count  = var.create_orchestration ? 1 : 0
+  source = "./modules/secrets"
+
+  project_name = var.project_name
+  environment  = var.environment
+
+  redshift_admin_username = var.redshift_admin_username
+  redshift_admin_password = var.redshift_admin_password
+}
+
+############################################
 # Orchestration and observability
 #
 # Both modules are additive. Monitoring is declared first because it owns the
@@ -126,6 +145,7 @@ module "stepfunctions" {
 
   redshift_workgroup_name = var.redshift_workgroup_name
   redshift_database       = var.redshift_database_name
+  redshift_secret_arn     = module.secrets[0].redshift_admin_secret_arn
 
   # The load SQL stays the single source of truth; it is read, not restated.
   copy_sql_path = "${path.root}/../services/redshift/load/02_copy_from_s3.sql"
