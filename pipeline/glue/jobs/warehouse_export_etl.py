@@ -32,6 +32,18 @@ dim_zone is driven from zone_matches, the validated MDM matching output. That
 excludes the location_id = 99999 test fixture structurally rather than by a
 magic-number filter - which matters, because the fixture's version 2 is
 is_current = TRUE and a naive `WHERE is_current` returns 266 rows, not 265.
+
+The current golden record is resolved by business key, through
+zone_matches.source_zone_id -> taxi_zones.location_id -> golden_zones.location_id
+WHERE is_current. It is deliberately NOT resolved through
+zone_matches.golden_zone_row_id: that column is a pointer to one specific SCD
+Type 2 version row, and nothing repoints it when the golden zone job supersedes
+that version. Joining on it silently drops every zone that has ever been
+updated - which is exactly what happened when location_id 1 (EWR) gained a
+version 3 and this job's guard correctly refused to publish a 264-row
+dimension. Joining by location_id always resolves to whichever version is
+current, so the export survives any number of future SCD2 updates while
+zone_matches keeps its historical pointer untouched.
 """
 
 import json
@@ -85,8 +97,10 @@ DIM_ZONE_QUERY = """
            g.golden_zone_row_id,
            g.version
     FROM zone_matches zm
+    JOIN taxi_zones t
+      ON t.location_id = zm.source_zone_id
     JOIN golden_zones g
-      ON g.golden_zone_row_id = zm.golden_zone_row_id
+      ON g.location_id = t.location_id
     WHERE g.is_current
       AND g.location_id BETWEEN %s AND %s
     ORDER BY g.location_id
