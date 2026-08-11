@@ -84,9 +84,6 @@ data "aws_iam_policy_document" "sfn" {
   # Secrets Manager, scoped to that one secret ARN. Read only - no write, no
   # rotation, no listing, and no access to any other secret.
   #
-  # The secret is encrypted with the AWS managed key for Secrets Manager, so
-  # no explicit kms:Decrypt grant is needed for a same-account caller. A
-  # customer managed key would require one.
   statement {
     sid    = "ReadRedshiftAdminSecret"
     effect = "Allow"
@@ -94,6 +91,19 @@ data "aws_iam_policy_document" "sfn" {
     actions = ["secretsmanager:GetSecretValue"]
 
     resources = [var.redshift_secret_arn]
+  }
+
+  # The secret is now encrypted with the project's customer managed key, so
+  # GetSecretValue alone is no longer sufficient - decrypting the returned
+  # ciphertext needs an explicit grant on the key. Decrypt only: this role
+  # never writes anything encrypted.
+  statement {
+    sid    = "DecryptSecretWithProjectKey"
+    effect = "Allow"
+
+    actions = ["kms:Decrypt"]
+
+    resources = [var.kms_key_arn]
   }
 
   # redshift-serverless:GetCredentials is deliberately NOT granted. It was

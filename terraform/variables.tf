@@ -329,3 +329,31 @@ variable "redshift_compute_seconds_threshold" {
   type        = number
   default     = 43200
 }
+
+# ----------------------------------------------------------------------------
+# Security phase
+# ----------------------------------------------------------------------------
+
+variable "glue_private_subnet_cidr" {
+  description = "CIDR of the private subnet created for Glue ENIs. Must not overlap the default VPC's existing /20 subnets at 172.31.0.0, 172.31.16.0 and 172.31.32.0."
+  type        = string
+  default     = "172.31.128.0/20"
+}
+
+variable "glue_private_subnet_az" {
+  description = "AZ for the Glue private subnet. Matches the NAT gateway's AZ to avoid cross-AZ data charges."
+  type        = string
+  default     = "us-east-2a"
+}
+
+variable "rds_backup_retention_period" {
+  description = "Days of automated RDS backups. Was effectively 0 before the security phase."
+  type        = number
+  default     = 7
+}
+
+variable "rds_deletion_protection" {
+  description = "Protect the MDM database from an accidental destroy."
+  type        = bool
+  default     = true
+}

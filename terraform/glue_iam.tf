@@ -76,7 +76,44 @@ data "aws_iam_policy_document" "glue_policy" {
     ]
     resources = [local.glue_log_group_arn]
   }
+
+  # Security phase: the database password is no longer passed as a job
+  # argument. The two database-facing jobs read this one secret at runtime.
+  dynamic "statement" {
+    for_each = var.create_orchestration ? [1] : []
+    content {
+      sid       = "ReadRdsSecret"
+      effect    = "Allow"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = [module.secrets[0].rds_master_secret_arn]
+    }
+  }
+
+  # Needed both to decrypt that secret and to read and write S3 objects now
+  # that the bucket's default encryption is the CMK. Encrypt and
+  # GenerateDataKey cover writes; Decrypt covers reads.
+  dynamic "statement" {
+    for_each = var.create_orchestration ? [1] : []
+    content {
+      sid    = "UseProjectKey"
+      effect = "Allow"
+      actions = [
+        "kms:Decrypt",
+        "kms:Encrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey",
+      ]
+      resources = [module.kms[0].key_arn]
+    }
+  }
 }
+
+# Note: AWSGlueServiceRole - which carries the EC2 ENI permissions Glue needs
+# to run inside a VPC - is already attached to this same role by
+# module.iam.aws_iam_role_policy_attachment.glue_service_role. It is
+# deliberately not re-attached here; two Terraform resources managing one
+# attachment would fight over it.
 
 resource "aws_iam_role_policy" "glue_policy" {
   name   = "${aws_iam_role.glue_role.name}-policy"

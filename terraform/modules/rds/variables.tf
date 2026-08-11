@@ -51,3 +51,19 @@ variable "instance_class" {
   type        = string
   default     = "db.t3.micro"
 }
+
+# ----------------------------------------------------------------------------
+# Security phase additions
+# ----------------------------------------------------------------------------
+
+variable "backup_retention_period" {
+  description = "Days of automated backups. Was hardcoded to 0, meaning the MDM database had no backups at all."
+  type        = number
+  default     = 7
+}
+
+variable "deletion_protection" {
+  description = "Guard against an accidental destroy of the MDM database."
+  type        = bool
+  default     = true
+}

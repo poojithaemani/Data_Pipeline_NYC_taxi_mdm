@@ -20,6 +20,10 @@ module "s3" {
   bucket_name  = var.bucket_name
   project_name = var.project_name
   environment  = var.environment
+
+  # Security phase: default encryption moves from SSE-S3 to the CMK. Applies
+  # to new objects only, so existing data stays readable untouched.
+  kms_key_arn = var.create_orchestration ? module.kms[0].key_arn : ""
 }
 
 module "iam" {
@@ -70,13 +74,22 @@ module "rds" {
   project_name = var.project_name
   environment  = var.environment
 
-  vpc_id                   = var.vpc_id
-  subnet_ids               = var.subnet_ids
-  source_security_group_id = var.source_security_group_id
+  vpc_id     = var.vpc_id
+  subnet_ids = var.subnet_ids
+
+  # Security phase: ingress was 0.0.0.0/0. It is now the Glue security group,
+  # which is the only consumer once the database is private.
+  source_security_group_id = var.create_orchestration ? module.network[0].glue_security_group_id : var.source_security_group_id
 
   database_name   = var.database_name
   master_username = var.master_username
-  master_password = var.master_password
+
+  # Security phase: rotated. Generated at apply time rather than read from
+  # tfvars, so the credential never lands in a file.
+  master_password = random_password.rds_master.result
+
+  backup_retention_period = var.rds_backup_retention_period
+  deletion_protection     = var.rds_deletion_protection
 
   allocated_storage = var.allocated_storage
   instance_class    = var.instance_class
@@ -97,8 +110,13 @@ module "secrets" {
   project_name = var.project_name
   environment  = var.environment
 
+  kms_key_id = module.kms[0].key_arn
+
   redshift_admin_username = var.redshift_admin_username
   redshift_admin_password = var.redshift_admin_password
+
+  rds_master_username = var.master_username
+  rds_master_password = random_password.rds_master.result
 }
 
 ############################################
@@ -157,4 +175,5 @@ module "stepfunctions" {
   pipeline_timeout_seconds = var.pipeline_timeout_seconds
 
   sns_topic_arn = module.monitoring[0].alerts_topic_arn
+  kms_key_arn   = module.kms[0].key_arn
 }

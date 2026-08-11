@@ -31,3 +31,11 @@ override.tf.json
 # ==============================
 CLAUDE.md
 BUILD.md
+
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/

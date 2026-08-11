@@ -1,3 +1,4 @@
+import ssl
 import sys
 import json
 from datetime import datetime
@@ -93,6 +94,38 @@ def process_source_data(spark, input_path, logger):
     return final_df
 
 
+def _db_credentials(secret_arn, logger):
+    """Fetch the database username and password from Secrets Manager.
+
+    Security phase: the password used to arrive as a --DB_PASSWORD job
+    argument, which any principal holding glue:GetJob could read and which
+    persisted in the job definition. Only the secret ARN travels as an
+    argument now; the credential is resolved at runtime and never written
+    anywhere.
+    """
+    import boto3
+
+    logger.info("Fetching database credentials from Secrets Manager.")
+    client = boto3.client("secretsmanager")
+    secret = json.loads(client.get_secret_value(SecretId=secret_arn)["SecretString"])
+    return secret["username"], secret["password"]
+
+
+def _ssl_context():
+    """TLS context for pg8000.
+
+    The instance sets rds.force_ssl = 1, and pg8000 does not negotiate TLS
+    unless it is handed a context. Certificate verification is left off
+    because the RDS CA bundle is not staged in the Glue container; the
+    connection is still encrypted in transit. Pinning the RDS CA is a
+    tracked follow-up.
+    """
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
+
+
 def get_db_connection(db_args, logger):
     """
     Establishes and returns a connection to the PostgreSQL database.
@@ -104,9 +137,11 @@ def get_db_connection(db_args, logger):
     Returns:
         pg8000.dbapi.Connection: A database connection object.
     """
-    required_keys = {"DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"}
+    required_keys = {"DB_HOST", "DB_PORT", "DB_NAME", "SECRET_ARN"}
     if not required_keys.issubset(db_args.keys()):
         raise ValueError(f"Missing one or more required DB arguments: {required_keys}")
+
+    username, password = _db_credentials(db_args["SECRET_ARN"], logger)
 
     # --- Connect to PostgreSQL ---
     logger.info(f"Connecting to database host: {db_args['DB_HOST']}")
@@ -115,8 +150,9 @@ def get_db_connection(db_args, logger):
             host=db_args["DB_HOST"],
             port=int(db_args["DB_PORT"]),
             database=db_args["DB_NAME"],
-            user=db_args["DB_USER"],
-            password=db_args["DB_PASSWORD"],
+            user=username,
+            password=password,
+            ssl_context=_ssl_context(),
         )
         logger.info("Database connection successful.")
         return conn
@@ -223,8 +259,7 @@ def main():
             "DB_HOST",
             "DB_PORT",
             "DB_NAME",
-            "DB_USER",
-            "DB_PASSWORD",
+            "SECRET_ARN",
         ],
     )
     job_name = job_args["JOB_NAME"]

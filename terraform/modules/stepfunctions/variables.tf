@@ -75,6 +75,11 @@ variable "redshift_secret_arn" {
   type        = string
 }
 
+variable "kms_key_arn" {
+  description = "Customer managed key encrypting the Redshift secret. The role needs kms:Decrypt on it in addition to secretsmanager:GetSecretValue."
+  type        = string
+}
+
 variable "redshift_poll_seconds" {
   description = "Interval between Redshift Data API status polls. The measured COPY takes about 15 seconds in total."
   type        = number

@@ -47,6 +47,7 @@ zone_matches keeps its historical pointer untouched.
 """
 
 import json
+import ssl
 import sys
 from datetime import datetime
 
@@ -116,20 +117,55 @@ DIM_ZONE_SCHEMA = StructType([
 ])
 
 
+def _db_credentials(secret_arn, logger):
+    """Fetch the database username and password from Secrets Manager.
+
+    Security phase: the password used to arrive as a --DB_PASSWORD job
+    argument, which any principal holding glue:GetJob could read and which
+    persisted in the job definition. Only the secret ARN travels as an
+    argument now; the credential is resolved at runtime and never written
+    anywhere.
+    """
+    import boto3
+
+    logger.info("Fetching database credentials from Secrets Manager.")
+    client = boto3.client("secretsmanager")
+    secret = json.loads(client.get_secret_value(SecretId=secret_arn)["SecretString"])
+    return secret["username"], secret["password"]
+
+
+def _ssl_context():
+    """TLS context for pg8000.
+
+    The instance sets rds.force_ssl = 1, and pg8000 does not negotiate TLS
+    unless it is handed a context. Certificate verification is left off
+    because the RDS CA bundle is not staged in the Glue container; the
+    connection is still encrypted in transit. Pinning the RDS CA is a
+    tracked follow-up.
+    """
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    return ctx
+
+
 def get_db_connection(job_args, logger):
     """Open a PostgreSQL connection using the job's DB_* arguments."""
-    required_keys = {"DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"}
+    required_keys = {"DB_HOST", "DB_PORT", "DB_NAME", "SECRET_ARN"}
     missing = required_keys - set(job_args)
     if missing:
         raise ValueError(f"Missing required DB arguments: {sorted(missing)}")
+
+    username, password = _db_credentials(job_args["SECRET_ARN"], logger)
 
     logger.info(f"Connecting to database host: {job_args['DB_HOST']}")
     conn = pg8000.dbapi.connect(
         host=job_args["DB_HOST"],
         port=int(job_args["DB_PORT"]),
         database=job_args["DB_NAME"],
-        user=job_args["DB_USER"],
-        password=job_args["DB_PASSWORD"],
+        user=username,
+        password=password,
+        ssl_context=_ssl_context(),
     )
     logger.info("Database connection successful.")
     return conn
@@ -255,8 +291,7 @@ def main():
             "DB_HOST",
             "DB_PORT",
             "DB_NAME",
-            "DB_USER",
-            "DB_PASSWORD",
+            "SECRET_ARN",
         ],
     )
     job_name = job_args["JOB_NAME"]

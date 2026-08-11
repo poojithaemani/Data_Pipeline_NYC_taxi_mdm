@@ -20,9 +20,17 @@ resource "aws_s3_bucket_versioning" "versioning" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   bucket = aws_s3_bucket.data_lake.id
 
+  # Security phase: was SSE-S3 (AES256) with an AWS owned key. Default
+  # encryption applies to NEW objects only, so every existing object stays
+  # readable exactly as before and no re-encryption backfill is required.
+  #
+  # bucket_key_enabled matters more with a CMK than it did with SSE-S3: it
+  # collapses per-object KMS calls into a bucket-level data key, which keeps
+  # KMS request cost flat across millions of Parquet part files.
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = var.kms_key_arn != "" ? "aws:kms" : "AES256"
+      kms_master_key_id = var.kms_key_arn != "" ? var.kms_key_arn : null
     }
 
     bucket_key_enabled = true

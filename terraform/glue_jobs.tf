@@ -122,6 +122,9 @@ resource "aws_glue_job" "silver_etl" {
 }
 
 resource "aws_glue_job" "golden_zone_etl" {
+  # Runs inside the VPC so it can reach the now-private RDS instance.
+  connections = var.create_orchestration ? [module.network[0].glue_connection_name] : []
+
   name              = "${var.project_name}-golden-zone-etl"
   role_arn          = aws_iam_role.glue_role.arn
   glue_version      = "4.0"
@@ -145,11 +148,15 @@ resource "aws_glue_job" "golden_zone_etl" {
 
       # Following the existing pattern of passing DB credentials as arguments.
       # This will be enhanced later with Secrets Manager.
-      "--DB_HOST"     = var.create_rds ? module.rds[0].db_address : ""
-      "--DB_PORT"     = var.create_rds ? module.rds[0].db_port : ""
-      "--DB_NAME"     = var.database_name
-      "--DB_USER"     = var.master_username
-      "--DB_PASSWORD" = var.master_password
+      "--DB_HOST" = var.create_rds ? module.rds[0].db_address : ""
+      "--DB_PORT" = var.create_rds ? module.rds[0].db_port : ""
+      "--DB_NAME" = var.database_name
+
+      # Security phase: --DB_USER and --DB_PASSWORD are gone. A job argument
+      # is readable by anyone holding glue:GetJob and persists in the job
+      # definition, so the credential is fetched from Secrets Manager at
+      # runtime instead. Only the ARN travels as an argument.
+      "--SECRET_ARN" = var.create_orchestration ? module.secrets[0].rds_master_secret_arn : ""
     }
   )
 
@@ -203,6 +210,9 @@ resource "aws_glue_job" "gold_etl" {
 ################################################################################
 
 resource "aws_glue_job" "warehouse_export_etl" {
+  # Runs inside the VPC so it can reach the now-private RDS instance.
+  connections = var.create_orchestration ? [module.network[0].glue_connection_name] : []
+
   name              = "${var.project_name}-warehouse-export-etl"
   role_arn          = aws_iam_role.glue_role.arn
   glue_version      = "4.0"
@@ -225,11 +235,15 @@ resource "aws_glue_job" "warehouse_export_etl" {
       "--warehouse_path" = "s3://${var.bucket_name}/${var.warehouse_path}"
 
       # Same credential-passing pattern as the golden zone job.
-      "--DB_HOST"     = var.create_rds ? module.rds[0].db_address : ""
-      "--DB_PORT"     = var.create_rds ? module.rds[0].db_port : ""
-      "--DB_NAME"     = var.database_name
-      "--DB_USER"     = var.master_username
-      "--DB_PASSWORD" = var.master_password
+      "--DB_HOST" = var.create_rds ? module.rds[0].db_address : ""
+      "--DB_PORT" = var.create_rds ? module.rds[0].db_port : ""
+      "--DB_NAME" = var.database_name
+
+      # Security phase: --DB_USER and --DB_PASSWORD are gone. A job argument
+      # is readable by anyone holding glue:GetJob and persists in the job
+      # definition, so the credential is fetched from Secrets Manager at
+      # runtime instead. Only the ARN travels as an argument.
+      "--SECRET_ARN" = var.create_orchestration ? module.secrets[0].rds_master_secret_arn : ""
     }
   )
 

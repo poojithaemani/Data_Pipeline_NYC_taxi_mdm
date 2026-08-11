@@ -175,3 +175,44 @@ output "redshift_admin_secret_name" {
   value       = var.create_orchestration ? module.secrets[0].redshift_admin_secret_name : null
   description = "Name of the Redshift admin secret"
 }
+
+# Security phase - identifiers only, never key material or credentials.
+output "kms_key_arn" {
+  value       = var.create_orchestration ? module.kms[0].key_arn : null
+  description = "Customer managed key encrypting the data lake, Athena results and the secrets"
+}
+
+output "kms_alias" {
+  value       = var.create_orchestration ? module.kms[0].alias_name : null
+  description = "Alias of the customer managed key"
+}
+
+output "rds_master_secret_arn" {
+  value       = var.create_orchestration ? module.secrets[0].rds_master_secret_arn : null
+  description = "ARN of the rotated RDS master credential"
+}
+
+output "rds_master_secret_name" {
+  value       = var.create_orchestration ? module.secrets[0].rds_master_secret_name : null
+  description = "Name of the rotated RDS master credential"
+}
+
+output "glue_vpc_connection_name" {
+  value       = var.create_orchestration ? module.network[0].glue_connection_name : null
+  description = "Glue NETWORK connection placing database-facing jobs in the VPC"
+}
+
+output "glue_security_group_id" {
+  value       = var.create_orchestration ? module.network[0].glue_security_group_id : null
+  description = "Security group for Glue ENIs; the only source allowed into RDS"
+}
+
+output "nat_gateway_public_ip" {
+  value       = var.create_orchestration ? module.network[0].nat_public_ip : null
+  description = "Elastic IP of the NAT gateway used for Glue outbound traffic"
+}
+
+output "s3_vpc_endpoint_id" {
+  value       = var.create_orchestration ? module.network[0].s3_vpc_endpoint_id : null
+  description = "S3 gateway endpoint keeping data-lake traffic off the NAT"
+}

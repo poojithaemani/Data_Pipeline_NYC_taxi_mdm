@@ -7,12 +7,17 @@ resource "aws_security_group" "rds_sg" {
   description = "Security group for PostgreSQL RDS"
   vpc_id      = var.vpc_id
 
+  # Security phase: this was cidr_blocks = ["0.0.0.0/0"], which exposed
+  # PostgreSQL to the entire internet. Ingress is now restricted to the Glue
+  # security group, which is the only thing that needs to reach the database.
+  # That is possible because the database-facing Glue jobs now run inside the
+  # VPC via a NETWORK connection rather than over the public endpoint.
   ingress {
-    description = "PostgreSQL"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "PostgreSQL from Glue job ENIs only"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [var.source_security_group_id]
   }
 
   egress {
@@ -63,6 +68,23 @@ resource "aws_db_parameter_group" "postgres" {
     value = "1"
   }
 
+  # Security phase: reject any connection that is not TLS. The Glue jobs pass
+  # an explicit ssl_context to pg8000, which does not negotiate TLS on its
+  # own. Certificate verification is deliberately not enforced client-side
+  # yet - that needs the RDS CA bundle staged for the job, which is tracked
+  # as a follow-up; the connection is encrypted either way.
+  #
+  # apply_method must be stated explicitly. rds.force_ssl only takes effect
+  # after a reboot, so AWS records it as pending-reboot while the provider
+  # defaults an unstated apply_method to "immediate" - which makes the two
+  # disagree on every plan and the resource never converges. This is the same
+  # class of perpetual drift as the Redshift workgroup config_parameter set.
+  parameter {
+    name         = "rds.force_ssl"
+    value        = "1"
+    apply_method = "pending-reboot"
+  }
+
   tags = {
     Project     = var.project_name
     Environment = var.environment
@@ -98,15 +120,26 @@ resource "aws_db_instance" "postgres" {
 
   storage_encrypted = true
 
-  publicly_accessible = true
+  # Security phase: was true, which put the instance on a public IP. Glue now
+  # reaches it privately through the VPC connection, so nothing needs the
+  # public endpoint.
+  #
+  # Consequence, deliberately accepted: the database is no longer reachable
+  # from a workstation. scripts/sync_pipeline_runs.py must run from inside
+  # the VPC from now on.
+  publicly_accessible = false
 
   multi_az = false
 
   skip_final_snapshot = true
 
-  backup_retention_period = 0
+  # Security phase: was 0, meaning no backups existed at all and any data
+  # loss was unrecoverable.
+  backup_retention_period = var.backup_retention_period
 
-  deletion_protection = false
+  # Security phase: was false, so a stray destroy could delete the MDM
+  # database outright.
+  deletion_protection = var.deletion_protection
 
   auto_minor_version_upgrade = true
 
