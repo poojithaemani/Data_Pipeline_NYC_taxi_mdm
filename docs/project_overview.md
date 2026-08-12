@@ -1,64 +1,198 @@
-# Project Overview: NYC Taxi Data Pipeline with MDM
+# Project Overview
 
-## 1. Project Goal
+An NYC Taxi **Master Data Management and analytics platform on AWS**. It is
+deliberately production-grade in its patterns - SCD Type 2, infrastructure as
+code, least privilege, cross-engine reconciliation - while staying small enough
+to run cheaply.
 
-The primary goal of this project is to build a scalable and robust data pipeline on AWS to process the NYC Taxi dataset. It implements a Master Data Management (MDM) system to ensure data quality and consistency for key business entities like taxi zones and vendors. The final output is a set of curated data marts in a data lake, ready for analytics and serving via an API.
-
-## 2. Core Concepts
-
-- **Data Lake Layers (Bronze, Silver, Gold)**: A standard medallion architecture is used to progressively refine data.
-  - **Bronze**: Raw, unaltered data ingested from sources.
-  - **Silver**: Cleaned, validated, and enriched data. This layer is the "single source of truth."
-  - **Gold**: Aggregated data marts tailored for specific business use cases or analytics.
-- **Master Data Management (MDM):** This project implements MDM for NYC Taxi Zone reference data. After evaluating the available datasets, Taxi Zones were identified as the primary master data entity because they contain descriptive business attributes (`Borough`, `Zone`, `service_zone`). `VendorID` is treated as a transactional reference code, as no vendor master dataset is available.
-- **Slowly Changing Dimensions (SCD) Type 2**: A technique to manage changes in master data over time by preserving history. Instead of overwriting records, new versions are inserted, and flags (`is_current`, `effective_date`) are used to identify the current record. This is implemented in the RDS PostgreSQL database.
-- **Infrastructure as Code (IaC)**: All AWS resources (S3 buckets, Glue jobs, RDS instances) are defined and managed using Terraform. This ensures consistency, repeatability, and version control for the infrastructure.
-
-## 3. Architecture Deep Dive
-
-The system is composed of two parallel pipelines that interact with each other.
-
-### a. Transactional Data Pipeline (The Main Flow)
-
-This pipeline processes the high-volume taxi trip records.
-
-1.  **Source**: The journey begins with the NYC Taxi dataset (e.g., yellow taxi trip records in Parquet format) landing in the **S3 Bronze** bucket.
-2.  **Bronze to Silver (ETL)**: An **AWS Glue PySpark job** (`yellow_taxi_silver_etl.py`) is triggered. Its responsibilities are:
-    - **Reading** raw Parquet data from Bronze.
-    - **Cleaning**: Removing duplicates, handling nulls, and correcting data types.
-    - **Enriching**: Joining with master data from the RDS database to get consistent vendor or zone information.
-    - **Partitioning**: Creating `pickup_year` and `pickup_month` columns for efficient querying.
-    - **Writing**: Saving the transformed data to the **S3 Silver** bucket in **Delta Lake** format. Delta Lake provides ACID transactions and time travel capabilities to the data lake.
-3.  **Silver to Gold (Aggregation)**: Another **Glue ETL job** reads from the Silver Delta table, performs business-level aggregations (e.g., calculating average fare per zone), and writes the results to the **S3 Gold** bucket, also in Delta Lake format.
-
-### b. Reference & Master Data Pipeline (The MDM Flow)
-
-This pipeline manages the `taxi_zones` master data entity to create the authoritative `golden_zones` table.
-
-1.  **Source**: The primary reference data is the `taxi+_zone_lookup.csv` file.
-2.  **Ingestion & ETL**: An AWS Glue job (`golden_zone_etl.py`) reads the source CSV from the S3 Bronze layer. It standardizes the data (e.g., cleans text fields) and generates a `record_hash` for each row to detect changes efficiently.
-3.  **Mastering in PostgreSQL**: The Glue job connects to the RDS PostgreSQL database and calls the `sp_upsert_golden_zone` stored procedure for each record. This procedure contains the SCD Type 2 logic to atomically insert new records or update existing ones by expiring the old version and creating a new one.
-
-`VendorID` is treated as a transactional reference code because no vendor master dataset is available.
-
-## 4. Data Serving and Consumption
-
-- **Analytics**: **Amazon Athena** is used to run ad-hoc SQL queries directly on the Gold (and Silver) Delta tables in S3. This is ideal for business intelligence and data analysis.
-- **API Access**: An **API Gateway** endpoint with a **Lambda** function provides real-time access to the master data stored in the **RDS PostgreSQL** database. This is for applications that need to look up the "current" golden record for a specific entity (e.g., get details for `location_id` 123).
-
-## 5. Key Technologies and Why They Were Chosen
-
-- **Terraform**: For IaC. Ensures the entire platform is reproducible and version-controlled.
-- **AWS S3**: Scalable, durable, and cost-effective storage for the data lake.
-- **AWS Glue (PySpark)**: A serverless ETL service that scales automatically. PySpark is a powerful tool for large-scale data transformation.
-- **Delta Lake**: Provides reliability (ACID transactions) and performance to the S3 data lake, making it behave more like a traditional data warehouse.
-- **RDS for PostgreSQL**: A managed relational database used to store the master data. Its transactional capabilities are essential for implementing the SCD Type 2 logic correctly and avoiding race conditions.
-- **AWS Lambda & API Gateway**: Provide a serverless, scalable, and low-cost way to expose master data via a REST API.
-
-## 6. Security & Operations
-
-- **Secrets Management**: Database credentials and other secrets are managed using **AWS Secrets Manager**. Terraform and Glue jobs are configured to fetch secrets at runtime, avoiding hardcoded values in code.
-- **Database Migrations**: Schema changes for the RDS database are managed through an ordered sequence of SQL migration scripts. The process includes steps for creating indexes concurrently to avoid locking, and clear guidance for safe execution and rollback.
-- **Configuration Management**: The ingestion pipeline is driven by a YAML configuration file (`sources.yaml`), making it easy to add new reference data sources without changing the core code. Pydantic is used for robust validation of this configuration.
+For how the pieces are wired together, see [architecture.md](architecture.md).
+This document covers what the platform is for and why it is built the way it
+is.
 
 ---
+
+## 1. What the platform does
+
+It processes ~2.85 million yellow taxi trips through a medallion data lake,
+masters the NYC taxi zone reference data with full version history, and serves
+the result as a Redshift star schema behind a QuickSight dashboard - all
+orchestrated by a single Step Functions execution and deployed by Terraform.
+
+The interesting part is not the volume. It is that two pipelines with very
+different characteristics have to meet correctly: a high-volume transactional
+flow that is reprocessed wholesale, and a low-volume reference flow where every
+individual change must be preserved forever.
+
+---
+
+## 2. Core concepts
+
+**Medallion architecture.** Bronze holds raw source data. Silver holds cleaned,
+validated, typed trip records in Delta Lake. Gold holds five business
+aggregations. Each layer is reproducible from the one before it.
+
+**Master Data Management.** Taxi zones are the master entity. They were chosen
+over vendors because they carry descriptive business attributes - `borough`,
+`zone`, `service_zone` - that genuinely change over time and need history.
+
+**SCD Type 2.** Changes to a golden zone never overwrite. The current version
+is expired with an `end_date` and a new version is inserted, so the full
+history of every zone is queryable. Implemented as a PostgreSQL stored
+procedure so the compare-and-version step is atomic and cannot race.
+
+**Infrastructure as code.** Every AWS resource is Terraform-managed, with
+remote state in S3 and locking via S3 conditional writes. There is no
+click-ops step in the platform's construction.
+
+**Reconciliation as a first-class test.** The warehouse is not trusted because
+the job reported success. It is trusted because 18 in-Redshift checks pass and
+33 days of trip counts and revenue tie out against the independently computed
+Gold tables in Athena, to the cent.
+
+---
+
+## 3. Design decisions worth explaining
+
+### Why `vendorid` is not mastered
+
+No authoritative vendor master exists for this dataset, and the data contains a
+vendor code that no available source can name. Creating a `dim_vendor` would
+mean inventing master data inside an MDM project, which is precisely the thing
+MDM exists to prevent. `vendorid` is carried as a degenerate dimension on the
+fact table instead.
+
+### Why there is no surrogate trip key
+
+Silver has no stable natural trip identifier - the strongest available
+six-column composite still collides on one pair of rows - and nothing
+downstream needs one. A Redshift `IDENTITY` column would be worse than nothing:
+values are assigned non-deterministically across slices, so every reload would
+renumber every trip and the warehouse would stop being reproducible.
+
+### Why the fact table is `DISTSTYLE EVEN`
+
+Every dimension is `DISTSTYLE ALL` and therefore replicated to all nodes, so
+joins to them need no redistribution at all. A `DISTKEY` on the fact would buy
+nothing against a replicated dimension, could serve only one of the two zone
+joins, and would introduce real skew because NYC pickups concentrate heavily in
+a handful of zones.
+
+### Why a separate warehouse export exists
+
+Redshift `COPY` cannot read Delta Lake, and Gold is pre-aggregated with no
+dimensional keys, so it cannot supply a trip-grain fact table. A separate
+plain-Parquet snapshot satisfies the warehouse requirement without touching the
+Silver and Gold Delta tables or the jobs that own them.
+
+### Why current records are resolved by business key
+
+`zone_matches` carries a pointer to a specific SCD2 version row, and nothing
+repoints it when a new version supersedes that one. Joining on it silently
+drops every zone that has ever been updated. Resolution therefore goes
+`zone_matches` to `taxi_zones` to `golden_zones WHERE is_current`, by
+`location_id` - which always finds whichever version is current and survives
+any number of future updates.
+
+### Why apply is manual
+
+The platform holds a reconciled multi-million-row warehouse, a private database
+with SCD2 history, and a live dashboard. Applying infrastructure changes
+because someone merged a commit is not a trade worth making. A human dispatches
+the deploy, types a confirmation, and a protected environment approves it.
+
+---
+
+## 4. Validated state
+
+Figures from the last full validated pipeline execution. Any change that moves
+one of these without explanation is a bug.
+
+| Metric | Value |
+|---|---|
+| Silver rows / `fact_trips` / SPICE rows | 2,851,125 |
+| `dim_zone` / `zone_matches` / `taxi_zones` | 265 |
+| `dim_date` (gap-free calendar) | 33 |
+| `dim_payment` (full TLC code set) | 7 |
+| `SUM(fare_amount)` | 52,389,612.60 |
+| `SUM(total_amount)` | 79,198,239.40 |
+| Gold: daily / vendor / borough / payment / hourly | 33 / 95 / 203,611 / 128 / 748 |
+| Distinct vendors | 3 |
+
+Reconciliation status: 18 of 18 in-Redshift checks pass; 33 of 33 days tie out
+against Gold on both trip count and revenue; the SPICE ingestion reports
+2,851,125 rows with 0 dropped.
+
+`golden_zones` holds more rows than there are zones, which is correct and is
+the point of SCD Type 2 - superseded versions are retained alongside the
+current ones.
+
+---
+
+## 5. Technology choices
+
+| Technology | Why |
+|---|---|
+| **Terraform** | Reproducible, reviewable infrastructure; a plan diff is the change-control mechanism |
+| **S3** | Durable, cheap data lake storage |
+| **Glue (PySpark)** | Serverless Spark; no cluster to manage for a pipeline that runs on demand |
+| **Delta Lake** | ACID writes, schema evolution and time travel over S3 |
+| **RDS PostgreSQL** | Transactional guarantees the SCD2 procedure depends on. Not Aurora - a single small instance is sufficient and cheaper |
+| **Redshift Serverless** | Star-schema serving without a permanently running cluster |
+| **QuickSight (SPICE)** | Fast dashboards decoupled from warehouse availability |
+| **Athena** | Ad-hoc SQL over the Delta tables and the independent reconciliation reference |
+| **Step Functions** | Orchestration with retries, error handling and durable, inspectable execution history |
+| **GitHub Actions + OIDC** | CI without any long-lived AWS credential |
+
+---
+
+## 6. What is deliberately not built
+
+- **No `dim_vendor`** - see above; it would fabricate master data
+- **No API layer** - an earlier design sketched API Gateway to Lambda to RDS
+  for master-data lookups. It was never deployed and the scaffolding has been
+  removed. Consumers reach mastered data through the warehouse
+- **No Kafka, Airflow, EMR, ECS or EKS** - the pipeline is batch and runs on
+  demand; Step Functions and Glue cover it without adding a platform to operate
+- **No streaming ingestion** - the source is published as periodic files
+
+---
+
+## 7. Known limitations
+
+Documented rather than hidden. Each is a deliberate decision with a stated
+reason.
+
+| Limitation | Status |
+|---|---|
+| The Redshift load is not atomic - `TRUNCATE` commits implicitly, so a mid-load failure leaves the warehouse partially refreshed | Accepted; recovery is a re-run. A staging-and-swap redesign would fix it |
+| RDS server certificate is not verified client-side; traffic is encrypted but the certificate is not pinned | Accepted; pinning needs the RDS CA bundle staged into the Glue container |
+| RDS storage and the Redshift namespace use AWS managed KMS keys rather than the project CMK | Accepted; switching either would require replacing the resource |
+| Alarms have no SNS subscriber, so they transition but notify nobody | Open; needs an address |
+| 321 Silver rows have a negative `total_amount`, and one trip is $863,380.37 | Carried through deliberately - Silver validates `fare_amount` but not `total_amount`, and filtering would break the Silver-to-fact reconciliation |
+| `gold_db.payment_summary.total_amount` actually contains `SUM(fare_amount)` | A naming defect in a frozen job. Reconciliation compares counts, or compares against `fare_amount` |
+| The Glue execution role is declared twice in Terraform, both mapping to the same physical role | Untangling needs a state operation; documented in architecture.md |
+
+---
+
+## 8. Repository layout
+
+```
+pipeline/glue/jobs/     Deployed Glue job scripts
+pipeline/ingestion/     Python reference-data ingestion orchestrator
+configs/                source.yaml and ingestion configuration
+services/database/      Schema, 13 migrations, SCD2 procedure, audit trigger, tests
+services/redshift/      Star-schema DDL, COPY script, reconciliation SQL
+scripts/                sync_pipeline_runs.py - Glue history into pipeline_runs
+terraform/              Root configuration and 11 wired modules
+.github/workflows/      CI, Terraform plan, protected apply
+docs/                   This documentation
+diagrams/               Architecture diagram source
+notebooks/              Exploratory analysis
+tests/                  Unit tests
+```
+
+The historical vendor SCD2 implementation is retained under
+`pipeline/glue/jobs/vendor_etl.py` and `services/database/`. It is inactive and
+referenced by nothing, but the `vendors` table and its stored procedure still
+exist in the database and the migrations create them, so the files remain as
+the record of their origin.
