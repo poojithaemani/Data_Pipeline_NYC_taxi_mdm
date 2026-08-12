@@ -221,3 +221,8 @@ output "sync_pipeline_runs_job_name" {
   value       = aws_glue_job.sync_pipeline_runs.name
   description = "Glue Python Shell job that syncs Glue run history into pipeline_runs from inside the VPC"
 }
+
+output "delta_demo_job_name" {
+  value       = aws_glue_job.delta_demo.name
+  description = "Glue job demonstrating Delta time travel and schema evolution under the demo/ prefix"
+}

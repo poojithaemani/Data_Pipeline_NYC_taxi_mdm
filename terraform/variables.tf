@@ -357,3 +357,9 @@ variable "rds_deletion_protection" {
   type        = bool
   default     = true
 }
+
+variable "demo_path" {
+  description = "S3 prefix holding the isolated Delta time-travel demonstration. Kept separate from the medallion layers so the demo can never be confused with production data."
+  type        = string
+  default     = "demo"
+}

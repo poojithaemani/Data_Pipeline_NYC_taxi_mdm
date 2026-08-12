@@ -350,3 +350,67 @@ resource "aws_glue_job" "sync_pipeline_runs" {
     ManagedBy   = "Terraform"
   }
 }
+
+################################################################################
+# Delta Lake time-travel and schema-evolution demonstration
+#
+# The remaining training-plan deliverable. Deliberately isolated: it writes
+# only under the demo/ prefix and reads only the Bronze zone CSV, so no
+# production Delta table, warehouse dataset, Redshift table or MDM record is
+# involved. It needs no database access and therefore no VPC connection.
+################################################################################
+
+resource "aws_s3_object" "delta_demo_script" {
+  bucket = var.bucket_name
+  key    = "glue/scripts/delta_demo_etl.py"
+  source = "${path.module}/../pipeline/glue/jobs/delta_demo_etl.py"
+
+  # source_hash, not etag: the bucket defaults to SSE-KMS, and S3 does not
+  # return the MD5 as the ETag for KMS-encrypted objects.
+  source_hash = filemd5("${path.module}/../pipeline/glue/jobs/delta_demo_etl.py")
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
+
+resource "aws_glue_job" "delta_demo" {
+  name              = "${var.project_name}-delta-demo"
+  role_arn          = aws_iam_role.glue_role.arn
+  glue_version      = "4.0"
+  worker_type       = var.glue_job_worker_type
+  number_of_workers = var.glue_job_number_of_workers
+
+  command {
+    name            = "glueetl"
+    python_version  = "3"
+    script_location = "s3://${aws_s3_object.delta_demo_script.bucket}/${aws_s3_object.delta_demo_script.key}"
+  }
+
+  default_arguments = merge(
+    local.common_glue_job_args,
+    {
+      # The DeltaTable API - forPath, update, history - needs the Delta SQL
+      # extension and catalog registered when the Spark session is created.
+      # The shared common_glue_job_args carry "--spark-sql-extensions" and
+      # "--spark-sql-catalog-spark_catalog", but those are ordinary job
+      # arguments, not Spark configuration; only "--conf" reaches Spark. The
+      # frozen Silver and Gold jobs never noticed because the DataSource API
+      # they use works without the extension. Scoped to this job so no frozen
+      # job's configuration changes.
+      "--conf" = "spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog"
+
+      "--demo_path"      = "s3://${var.bucket_name}/${var.demo_path}"
+      "--zones_csv_path" = "s3://${var.bucket_name}/${var.bronze_reference_path}taxi_zones/taxi_zones.csv"
+    }
+  )
+
+  tags = {
+    Name        = "${var.project_name}-delta-demo"
+    Project     = var.project_name
+    Environment = var.environment
+    ManagedBy   = "Terraform"
+  }
+}
