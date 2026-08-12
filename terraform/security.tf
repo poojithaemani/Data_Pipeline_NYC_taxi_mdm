@@ -77,3 +77,29 @@ module "network" {
   availability_zone    = var.glue_private_subnet_az
   private_subnet_cidr  = var.glue_private_subnet_cidr
 }
+
+############################################
+# GitHub Actions OIDC
+#
+# Additive. Creates the identity provider and the two roles CI assumes; no
+# access key is ever issued. Depends on the KMS key so the plan role can
+# decrypt during refresh.
+############################################
+
+module "github_oidc" {
+  count  = var.create_cicd ? 1 : 0
+  source = "./modules/github_oidc"
+
+  project_name = var.project_name
+  environment  = var.environment
+
+  github_repository = var.github_repository
+  apply_environment = var.cicd_apply_environment
+
+  tfstate_bucket_name = var.tfstate_bucket_name
+  kms_key_arn         = var.create_orchestration ? module.kms[0].key_arn : ""
+
+  # The Redshift role is nyc-taxi-mdm-redshift-role, which the
+  # nyc-taxi-mdm-platform prefix does not match.
+  iam_secondary_prefix = var.redshift_namespace_name
+}

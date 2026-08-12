@@ -1,0 +1,81 @@
+# Terraform apply - manual, gated, never automatic.
+#
+# There is deliberately no push or pull_request trigger. This platform holds a
+# reconciled 2.85M-row warehouse, a private RDS instance and an MDM database
+# with SCD Type 2 history; applying infrastructure changes because someone
+# merged a commit is not a trade worth making. A human chooses when to deploy.
+#
+# Three independent gates:
+#
+#   1. workflow_dispatch - a person starts it, on purpose
+#   2. the typed confirmation input must be exactly APPLY
+#   3. the "production" environment, whose required reviewers are configured
+#      in repository settings, must approve before the job runs
+#
+# Requires vars.AWS_ROLE_ARN on the production environment to hold the apply
+# role's ARN, output by Terraform as github_actions_apply_role_arn.
+
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type APPLY to confirm you intend to change infrastructure'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+# Never let two applies overlap; queue rather than cancel, because cancelling
+# an in-flight apply is how state gets torn.
+concurrency:
+  group: tf-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply
+    runs-on: ubuntu-latest
+    # Configure required reviewers on this environment in repository settings.
+    # Without that, the typed confirmation is the only gate.
+    environment: production
+    if: inputs.confirm == 'APPLY' && vars.AWS_ROLE_ARN != ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
+          role-session-name: gha-terraform-apply
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+          terraform_wrapper: false
+
+      - name: terraform init
+        working-directory: terraform
+        run: terraform init -input=false
+
+      # Plan and apply in one job against a saved plan, so what the reviewer
+      # approved is exactly what runs. The plan file is written to the runner's
+      # ephemeral disk, never uploaded, and removed afterwards - it contains
+      # sensitive values in plaintext.
+      - name: terraform plan
+        working-directory: terraform
+        run: terraform plan -no-color -input=false -out=tfplan
+
+      - name: terraform apply
+        working-directory: terraform
+        run: terraform apply -no-color -input=false tfplan
+
+      - name: Remove plan file
+        if: always()
+        working-directory: terraform
+        run: rm -f tfplan

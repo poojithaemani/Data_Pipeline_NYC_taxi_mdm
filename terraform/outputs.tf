@@ -226,3 +226,24 @@ output "delta_demo_job_name" {
   value       = aws_glue_job.delta_demo.name
   description = "Glue job demonstrating Delta time travel and schema evolution under the demo/ prefix"
 }
+
+# CI/CD - identifiers only. Role ARNs are not credentials.
+output "tfstate_bucket" {
+  value       = aws_s3_bucket.tfstate.id
+  description = "S3 bucket holding remote Terraform state"
+}
+
+output "github_oidc_provider_arn" {
+  value       = var.create_cicd ? module.github_oidc[0].oidc_provider_arn : null
+  description = "GitHub Actions OIDC identity provider"
+}
+
+output "github_actions_plan_role_arn" {
+  value       = var.create_cicd ? module.github_oidc[0].plan_role_arn : null
+  description = "Set as the AWS_ROLE_ARN repository variable for pull-request plans"
+}
+
+output "github_actions_apply_role_arn" {
+  value       = var.create_cicd ? module.github_oidc[0].apply_role_arn : null
+  description = "Set as AWS_ROLE_ARN on the protected production environment"
+}

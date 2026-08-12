@@ -1,0 +1,87 @@
+# Terraform plan for pull requests.
+#
+# Split out from ci.yml because this is the only pull-request workflow that
+# touches AWS. It authenticates with short-lived OIDC credentials and is
+# strictly read-only: plan, never apply.
+#
+# ---------------------------------------------------------------------------
+# Setup required before this runs
+# ---------------------------------------------------------------------------
+# State lives in S3 (see terraform/versions.tf), so a runner can diff against
+# real infrastructure. The one thing still needed is the repository variable:
+#
+#   vars.AWS_ROLE_ARN   the read-only plan role's ARN, output by Terraform as
+#                       github_actions_plan_role_arn
+#
+# Until it is set the job skips cleanly - green, not failed.
+
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - "pipeline/glue/jobs/**"
+      - "scripts/sync_pipeline_runs.py"
+      - ".github/workflows/terraform-plan.yml"
+
+permissions:
+  contents: read
+  id-token: write # required to mint the OIDC token
+  pull-requests: write # required to write the plan summary
+
+concurrency:
+  group: tf-plan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    # Skips cleanly when the backend and role have not been configured yet.
+    if: vars.AWS_ROLE_ARN != ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # No access keys anywhere. The runner exchanges its OIDC token for
+      # short-lived credentials, and the role's trust policy is what restricts
+      # which repository and branch may assume it.
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-2' }}
+          role-session-name: gha-terraform-plan
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+          terraform_wrapper: false
+
+      - name: terraform init
+        working-directory: terraform
+        run: terraform init -input=false
+
+      # -lock=false: a plan needs no state lock, and taking one from CI can
+      # block an operator mid-apply.
+      # No -out: a saved plan file embeds sensitive values in plaintext, so it
+      # is never written and never uploaded as an artifact.
+      - name: terraform plan
+        id: plan
+        working-directory: terraform
+        run: |
+          set -o pipefail
+          terraform plan -no-color -input=false -lock=false | tee plan.txt
+          echo "### Terraform plan" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -c 60000 plan.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      # Deleted explicitly rather than relied on being ephemeral, so a future
+      # artifact-upload step cannot pick it up by accident.
+      - name: Remove plan output
+        if: always()
+        working-directory: terraform
+        run: rm -f plan.txt

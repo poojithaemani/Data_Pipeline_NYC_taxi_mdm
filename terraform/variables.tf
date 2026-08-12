@@ -363,3 +363,31 @@ variable "demo_path" {
   type        = string
   default     = "demo"
 }
+
+# ----------------------------------------------------------------------------
+# CI/CD - remote state and GitHub Actions OIDC
+# ----------------------------------------------------------------------------
+
+variable "tfstate_bucket_name" {
+  description = "S3 bucket holding remote Terraform state. Must be globally unique; the account id keeps it so."
+  type        = string
+  default     = "nyc-taxi-mdm-platform-tfstate-749185461065"
+}
+
+variable "create_cicd" {
+  description = "Create the GitHub Actions OIDC provider and its plan/apply roles."
+  type        = bool
+  default     = true
+}
+
+variable "github_repository" {
+  description = "owner/repo permitted to assume the CI roles. This is the security boundary for OIDC."
+  type        = string
+  default     = "poojithaemani/Data_Pipeline_NYC_taxi_mdm"
+}
+
+variable "cicd_apply_environment" {
+  description = "GitHub environment gating the apply role. Configure its required reviewers in repository settings."
+  type        = string
+  default     = "production"
+}

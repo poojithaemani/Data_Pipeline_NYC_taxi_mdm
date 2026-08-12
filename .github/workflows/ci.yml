@@ -1,0 +1,109 @@
+# Continuous integration.
+#
+# Everything here runs WITHOUT AWS credentials - formatting, configuration
+# validity, Python syntax, unit tests and secret scanning are all static
+# checks. That is deliberate: the checks that gate a pull request should not
+# depend on cloud access, and a fork's pull request must never be able to
+# obtain credentials.
+#
+# The Terraform plan lives in a separate, credential-bearing workflow
+# (terraform-plan.yml), and apply is manual only (terraform-apply.yml).
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Read-only by default. Any workflow needing more asks for it explicitly.
+permissions:
+  contents: read
+
+# A newer push to the same branch supersedes an in-flight run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: Terraform format and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.15.8
+          # The wrapper rewrites stdout, which makes failures harder to read.
+          terraform_wrapper: false
+
+      - name: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive
+
+      # -backend=false installs providers and resolves the local modules
+      # without touching remote state, so no AWS credentials are required.
+      - name: terraform init
+        working-directory: terraform
+        run: terraform init -backend=false -input=false
+
+      - name: terraform validate
+        working-directory: terraform
+        run: terraform validate -no-color
+
+  python:
+    name: Python syntax and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # requirements-dev.txt includes requirements.txt via -r, so this is the
+      # single install.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      # compileall only parses; it never imports. That matters because the
+      # Glue job scripts import awsglue and pyspark, which exist only inside
+      # a Glue runtime and are not installable here.
+      - name: Syntax check
+        run: python -m compileall -q pipeline scripts services tests
+
+      - name: Unit tests
+        run: pytest tests -q
+
+  security:
+    name: Secret and repository hygiene scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Gitleaks scans history, not just the tip.
+          fetch-depth: 0
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # A dependency-free backstop for the specific artifacts this project
+      # must never publish. The repository is public and the local working
+      # tree holds real credentials in gitignored files, so a single bad
+      # `git add -A` is the realistic failure mode this guards against.
+      - name: Forbidden files must not be tracked
+        run: |
+          set -euo pipefail
+          pattern='\.(tfstate|tfvars|tfplan|pem|key|p12|pfx|jks)$|tfstate\.|(^|/)tfplan|(^|/)\.env$|\.pyc$|__pycache__/|(^|/)(BUILD|CLAUDE)\.md$|(^|/)credentials$|id_rsa'
+          if tracked=$(git ls-files | grep -iE "$pattern"); then
+            echo "::error::Files that must never be committed are tracked:"
+            echo "$tracked"
+            exit 1
+          fi
+          echo "No forbidden files are tracked."

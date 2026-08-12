@@ -1,0 +1,10 @@
+# Development and CI dependencies.
+#
+# Kept separate from requirements.txt so the runtime dependency set the
+# pipeline actually needs is unchanged. The repository already contains a
+# pytest-style suite under tests/, but pytest itself was never declared
+# anywhere; CI needs it to run them.
+
+-r requirements.txt
+
+pytest>=8.0.0
