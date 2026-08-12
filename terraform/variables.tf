@@ -47,18 +47,6 @@ variable "master_username" {
   sensitive = true
 }
 
-variable "master_password" {
-  description = "Master password for the RDS instance. Required only when create_rds is true."
-  type        = string
-  sensitive   = true
-  default     = ""
-  # Require a non-empty password only when RDS is being created
-  validation {
-    condition     = var.create_rds ? length(trimspace(var.master_password)) > 0 : true
-    error_message = "master_password must be provided when create_rds is true"
-  }
-}
-
 variable "allocated_storage" {
   type    = number
   default = 20
@@ -197,16 +185,6 @@ variable "athena_workgroup_name" {
 variable "athena_results_prefix" {
   type    = string
   default = "athena-results/"
-}
-
-variable "enable_kms_for_athena" {
-  type    = bool
-  default = false
-}
-
-variable "kms_key_id" {
-  type    = string
-  default = ""
 }
 
 # S3 prefixes to grant crawler access to (can be extended)
