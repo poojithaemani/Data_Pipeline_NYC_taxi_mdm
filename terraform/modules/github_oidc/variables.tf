@@ -18,6 +18,17 @@ variable "github_repository" {
   }
 }
 
+variable "github_repository_immutable" {
+  description = "Same repository in the ID-bearing form GitHub now emits in the OIDC sub claim - owner@ownerid/repo@repoid. Accepted alongside github_repository so the trust policy matches whichever form GitHub sends. Empty to accept only the classic form."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.github_repository_immutable == "" || can(regex("^[A-Za-z0-9._-]+@[0-9]+/[A-Za-z0-9._-]+@[0-9]+$", var.github_repository_immutable))
+    error_message = "github_repository_immutable must be empty or in owner@ownerid/repo@repoid form."
+  }
+}
+
 variable "apply_environment" {
   description = "GitHub environment whose required reviewers gate the apply role. The name appears in the sub claim, so approval is enforced by the AWS trust policy, not just by workflow convention."
   type        = string

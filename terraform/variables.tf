@@ -364,6 +364,12 @@ variable "github_repository" {
   default     = "poojithaemani/Data_Pipeline_NYC_taxi_mdm"
 }
 
+variable "github_repository_immutable" {
+  description = "The same repository in the ID-bearing form GitHub emits in the OIDC sub claim: owner@ownerid/repo@repoid. The numeric IDs are immutable, so a rename cannot be used to impersonate the repository. Both forms are accepted by the trust policies."
+  type        = string
+  default     = "poojithaemani@166465179/Data_Pipeline_NYC_taxi_mdm@1311315580"
+}
+
 variable "cicd_apply_environment" {
   description = "GitHub environment gating the apply role. Configure its required reviewers in repository settings."
   type        = string

@@ -93,8 +93,9 @@ module "github_oidc" {
   project_name = var.project_name
   environment  = var.environment
 
-  github_repository = var.github_repository
-  apply_environment = var.cicd_apply_environment
+  github_repository           = var.github_repository
+  github_repository_immutable = var.github_repository_immutable
+  apply_environment           = var.cicd_apply_environment
 
   tfstate_bucket_name = var.tfstate_bucket_name
   kms_key_arn         = var.create_orchestration ? module.kms[0].key_arn : ""

@@ -23,6 +23,25 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
   partition  = data.aws_partition.current.partition
   oidc_host  = "token.actions.githubusercontent.com"
+
+  # GitHub emits the subject claim in one of two shapes. The classic form is
+  # "repo:owner/name:context". The newer form embeds the immutable numeric
+  # account and repository IDs - "repo:owner@1234/name@5678:context" - so that
+  # renaming an account or repository cannot be used to impersonate it.
+  #
+  # Which form arrives is GitHub's decision, not ours, and it can change. Both
+  # exact strings are therefore accepted. StringEquals matches on any element
+  # of the list, so this is still an exact match against this repository - it
+  # is not a wildcard and does not widen the trust boundary.
+  plan_subjects = compact([
+    "repo:${var.github_repository}:pull_request",
+    var.github_repository_immutable != "" ? "repo:${var.github_repository_immutable}:pull_request" : "",
+  ])
+
+  apply_subjects = compact([
+    "repo:${var.github_repository}:environment:${var.apply_environment}",
+    var.github_repository_immutable != "" ? "repo:${var.github_repository_immutable}:environment:${var.apply_environment}" : "",
+  ])
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -63,7 +82,7 @@ data "aws_iam_policy_document" "plan_assume" {
     condition {
       test     = "StringEquals"
       variable = "${local.oidc_host}:sub"
-      values   = ["repo:${var.github_repository}:pull_request"]
+      values   = local.plan_subjects
     }
   }
 }
@@ -90,7 +109,7 @@ data "aws_iam_policy_document" "apply_assume" {
     condition {
       test     = "StringEquals"
       variable = "${local.oidc_host}:sub"
-      values   = ["repo:${var.github_repository}:environment:${var.apply_environment}"]
+      values   = local.apply_subjects
     }
   }
 }
