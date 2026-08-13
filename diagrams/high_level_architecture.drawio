@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e" compressed="false">
     <diagram id="p1" name="1 · Data Flow">
-        <mxGraphModel dx="1366" dy="779" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="1420" math="0" shadow="0">
+        <mxGraphModel dx="1456" dy="636" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="1420" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -119,7 +119,12 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="ew1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=0;fontSize=10;fontColor=#5A6C7D;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="silver" target="gwh" edge="1">
-                    <mxGeometry relative="1" as="geometry"/>
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="549" y="216"/>
+                            <mxPoint x="549" y="840"/>
+                        </Array>
+                    </mxGeometry>
                 </mxCell>
                 <mxCell id="ew2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7AA116;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=0;fontSize=10;fontColor=#5A6C7D;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" parent="1" source="rds" target="gwh" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
@@ -185,7 +190,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="p2" name="2 · Orchestration and Observability">
-        <mxGraphModel dx="1366" dy="779" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="850" math="0" shadow="0">
+        <mxGraphModel dx="1456" dy="636" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="850" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -306,7 +311,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="p3" name="3 · Network and Security">
-        <mxGraphModel dx="1366" dy="779" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1720" pageHeight="920" math="0" shadow="0">
+        <mxGraphModel dx="1456" dy="636" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1720" pageHeight="920" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -410,7 +415,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="p4" name="4 · CI/CD">
-        <mxGraphModel dx="1366" dy="779" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1620" pageHeight="840" math="0" shadow="0">
+        <mxGraphModel dx="1456" dy="636" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1620" pageHeight="840" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -484,7 +489,7 @@
                 <mxCell id="c2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#57606A;strokeWidth=2;endArrow=blockThin;endFill=1;dashed=0;fontSize=10;fontColor=#5A6C7D;labelBackgroundColor=#FFFFFF;" parent="1" source="pr" target="plan" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
-                            <mxPoint x="193" y="384"/>
+                            <mxPoint x="196" y="384"/>
                             <mxPoint x="205" y="384"/>
                         </Array>
                     </mxGeometry>
