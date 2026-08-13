@@ -13,7 +13,8 @@
 #      in repository settings, must approve before the job runs
 #
 # Requires vars.AWS_ROLE_ARN on the production environment to hold the apply
-# role's ARN, output by Terraform as github_actions_apply_role_arn.
+# role's ARN, output by Terraform as github_actions_apply_role_arn, and
+# secrets.TFVARS to hold the contents of the gitignored terraform.tfvars.
 
 name: Terraform Apply
 
@@ -44,6 +45,9 @@ jobs:
     environment: production
     if: inputs.confirm == 'APPLY' && vars.AWS_ROLE_ARN != ''
 
+    env:
+      TFVARS: ${{ secrets.TFVARS }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -59,9 +63,25 @@ jobs:
           terraform_version: 1.15.8
           terraform_wrapper: false
 
+      # Unlike the plan workflow, a missing TFVARS fails loudly here. Skipping
+      # an apply that an operator deliberately dispatched, and reporting green,
+      # would be worse than an error - they would believe it had deployed.
+      - name: Require tfvars
+        run: |
+          if [ -z "$TFVARS" ]; then
+            echo "::error::The TFVARS repository secret is not set. It must hold the contents of terraform/terraform.tfvars."
+            exit 1
+          fi
+
       - name: terraform init
         working-directory: terraform
         run: terraform init -input=false
+
+      # terraform.tfvars is gitignored and absent on the runner. Loaded via the
+      # .auto.tfvars suffix, and covered by the existing *.tfvars ignore rule.
+      - name: Materialise tfvars
+        working-directory: terraform
+        run: printf '%s' "$TFVARS" > ci.auto.tfvars
 
       # Plan and apply in one job against a saved plan, so what the reviewer
       # approved is exactly what runs. The plan file is written to the runner's
@@ -75,7 +95,7 @@ jobs:
         working-directory: terraform
         run: terraform apply -no-color -input=false tfplan
 
-      - name: Remove plan file
+      - name: Remove plan file and tfvars
         if: always()
         working-directory: terraform
-        run: rm -f tfplan
+        run: rm -f tfplan ci.auto.tfvars
