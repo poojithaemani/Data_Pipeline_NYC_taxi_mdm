@@ -1,3 +1,5 @@
+# CI/CD Terraform plan verification
+
 output "glue_log_group" {
   value = module.cloudwatch.glue_log_group_name
 }
