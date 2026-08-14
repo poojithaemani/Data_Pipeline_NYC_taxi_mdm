@@ -8,6 +8,11 @@ output "glue_connection_name" {
   value       = aws_glue_connection.vpc.name
 }
 
+output "glue_connection_arn" {
+  description = "ARN of the Glue NETWORK connection, so an IAM policy can be scoped to this one connection rather than to glue:*"
+  value       = aws_glue_connection.vpc.arn
+}
+
 output "private_subnet_id" {
   description = "Private subnet hosting Glue ENIs"
   value       = aws_subnet.private.id

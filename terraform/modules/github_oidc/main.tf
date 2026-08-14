@@ -18,6 +18,7 @@
 
 data "aws_caller_identity" "current" {}
 data "aws_partition" "current" {}
+data "aws_region" "current" {}
 
 locals {
   account_id = data.aws_caller_identity.current.account_id
@@ -163,6 +164,44 @@ data "aws_iam_policy_document" "plan_state" {
     effect    = "Allow"
     actions   = ["kms:Decrypt", "kms:DescribeKey"]
     resources = [var.kms_key_arn]
+  }
+
+  # Refreshing aws_secretsmanager_secret_version reads the secret string to
+  # detect drift, so a plan cannot complete without this. ReadOnlyAccess
+  # deliberately omits GetSecretValue because it returns credential material,
+  # which makes this an explicit, narrow exception rather than an oversight:
+  # exactly the two managed secret ARNs, and no other Secrets Manager action.
+  dynamic "statement" {
+    for_each = length(var.plan_readable_secret_arns) > 0 ? [1] : []
+
+    content {
+      sid       = "ReadManagedSecretValues"
+      effect    = "Allow"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = var.plan_readable_secret_arns
+    }
+  }
+
+  # glue:GetConnection is omitted from ReadOnlyAccess for the same reason - a
+  # JDBC connection can carry a password. This one is a NETWORK connection
+  # holding only an availability zone, subnet and security group, but IAM
+  # cannot tell the two apart, so the grant names the single connection.
+  #
+  # The catalog ARN is required alongside it: Glue authorises GetConnection
+  # against both the catalog and the connection. Listing both keeps the scope
+  # intact - any other connection still fails its own resource check.
+  dynamic "statement" {
+    for_each = var.plan_readable_glue_connection_arn != "" ? [1] : []
+
+    content {
+      sid     = "ReadManagedGlueConnection"
+      effect  = "Allow"
+      actions = ["glue:GetConnection"]
+      resources = [
+        var.plan_readable_glue_connection_arn,
+        "arn:${local.partition}:glue:${data.aws_region.current.region}:${local.account_id}:catalog",
+      ]
+    }
   }
 }
 

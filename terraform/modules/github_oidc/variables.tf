@@ -18,6 +18,28 @@ variable "github_repository" {
   }
 }
 
+variable "plan_readable_secret_arns" {
+  description = "Exact ARNs of the Terraform-managed Secrets Manager secrets the plan role may read. Terraform reads a secret's value on every refresh of aws_secretsmanager_secret_version, and GetSecretValue is excluded from the ReadOnlyAccess managed policy because it returns credential material. Listed explicitly - never a wildcard. Empty grants nothing."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for a in var.plan_readable_secret_arns : can(regex("^arn:[a-z-]+:secretsmanager:", a))])
+    error_message = "plan_readable_secret_arns must contain full Secrets Manager ARNs."
+  }
+}
+
+variable "plan_readable_glue_connection_arn" {
+  description = "Exact ARN of the Terraform-managed Glue connection the plan role may read. glue:GetConnection is excluded from ReadOnlyAccess because a JDBC connection can carry a password. Empty grants nothing."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.plan_readable_glue_connection_arn == "" || can(regex("^arn:[a-z-]+:glue:[a-z0-9-]+:[0-9]+:connection/", var.plan_readable_glue_connection_arn))
+    error_message = "plan_readable_glue_connection_arn must be empty or a full Glue connection ARN."
+  }
+}
+
 variable "github_repository_immutable" {
   description = "Same repository in the ID-bearing form GitHub now emits in the OIDC sub claim - owner@ownerid/repo@repoid. Accepted alongside github_repository so the trust policy matches whichever form GitHub sends. Empty to accept only the classic form."
   type        = string

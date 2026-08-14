@@ -100,6 +100,16 @@ module "github_oidc" {
   tfstate_bucket_name = var.tfstate_bucket_name
   kms_key_arn         = var.create_orchestration ? module.kms[0].key_arn : ""
 
+  # Terraform refresh reads these three resources directly, and ReadOnlyAccess
+  # covers neither action. Passed as exact ARNs from the resources themselves
+  # so nothing account-specific is written into the policy by hand.
+  plan_readable_secret_arns = var.create_orchestration ? [
+    module.secrets[0].rds_master_secret_arn,
+    module.secrets[0].redshift_admin_secret_arn,
+  ] : []
+
+  plan_readable_glue_connection_arn = var.create_orchestration ? module.network[0].glue_connection_arn : ""
+
   # The Redshift role is nyc-taxi-mdm-redshift-role, which the
   # nyc-taxi-mdm-platform prefix does not match.
   iam_secondary_prefix = var.redshift_namespace_name
