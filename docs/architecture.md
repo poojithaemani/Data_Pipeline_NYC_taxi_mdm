@@ -227,8 +227,11 @@ CloudWatch rejects those on alarms. Job failure is alarmed through EventBridge
 and the state machine instead, which are better signals anyway - a failed Spark
 task can be retried and the job still succeed.
 
-Alarms publish to an SNS topic. A subscriber must be added for anyone to be
-notified.
+Alarms publish to an SNS topic with a confirmed email subscription, so a
+transition reaches a person. The subscription is created only when
+`alert_email` is set - an email subscription cannot be confirmed by Terraform,
+so the resource existing is not by itself proof that anything is delivered.
+The confirmed state is the thing worth checking.
 
 ---
 
@@ -251,6 +254,30 @@ to `repo:<owner>/<repo>:environment:production`, so the environment's required
 reviewers are enforced by the AWS trust policy rather than by workflow
 convention alone.
 
+Each policy accepts that subject in two forms. Alongside the classic
+`owner/name`, GitHub also issues an immutable variant carrying the numeric
+account and repository IDs - `owner@1234/name@5678` - so that renaming either
+cannot be used to impersonate the repository. Which form arrives is GitHub's
+choice and can change, so both exact strings are listed. `StringEquals`
+matches any element of a list, so this stays an exact match on one repository
+rather than a wildcard.
+
+Two pieces of repository configuration are required and are not in this
+repository, by design:
+
+| Setting | Where | Value |
+|---|---|---|
+| `AWS_ROLE_ARN` | repository variable | plan role ARN |
+| `AWS_ROLE_ARN` | `production` environment variable | apply role ARN |
+| `TFVARS` | repository secret | contents of `terraform.tfvars` |
+
+Environment variables override repository ones, which is what routes each
+workflow to the correct role. `TFVARS` carries the whole variable file rather
+than a variable per secret because a plan is only worth reading if its inputs
+match the operator's exactly; supplying a subset lets Terraform fall back to
+defaults and produce a diff that looks authoritative while proposing changes
+that are not real.
+
 Apply has no push or pull-request trigger at all and is gated three ways: a
 person dispatches it, a typed confirmation must read `APPLY`, and the
 protected environment must approve. No plan file is ever uploaded as an
@@ -258,6 +285,13 @@ artifact - a saved plan embeds sensitive values in plaintext.
 
 State lives in a private, versioned S3 bucket with S3 conditional-write
 locking, so no DynamoDB lock table is needed.
+
+`.gitattributes` forces `eol=lf` in the working tree on every platform. The
+Glue job scripts are deployed with `source_hash = filemd5(...)`, which hashes
+the bytes on disk, so a Windows checkout with CRLF and a Linux runner with LF
+produce different hashes for identical source. Without normalisation every CI
+plan reports phantom changes to the script objects, and applying from the two
+platforms alternately would rewrite them forever.
 
 ---
 

@@ -167,7 +167,7 @@ reason.
 | The Redshift load is not atomic - `TRUNCATE` commits implicitly, so a mid-load failure leaves the warehouse partially refreshed | Accepted; recovery is a re-run. A staging-and-swap redesign would fix it |
 | RDS server certificate is not verified client-side; traffic is encrypted but the certificate is not pinned | Accepted; pinning needs the RDS CA bundle staged into the Glue container |
 | RDS storage and the Redshift namespace use AWS managed KMS keys rather than the project CMK | Accepted; switching either would require replacing the resource |
-| Alarms have no SNS subscriber, so they transition but notify nobody | Open; needs an address |
+| The QuickSight layer is created through the API rather than Terraform - the VPC connection, data source, dataset, analysis and dashboard | Accepted for now. Everything else in the platform is Terraform-managed, so this is the one place where a rebuild from code alone would not reproduce the whole system |
 | 321 Silver rows have a negative `total_amount`, and one trip is $863,380.37 | Carried through deliberately - Silver validates `fare_amount` but not `total_amount`, and filtering would break the Silver-to-fact reconciliation |
 | `gold_db.payment_summary.total_amount` actually contains `SUM(fare_amount)` | A naming defect in a frozen job. Reconciliation compares counts, or compares against `fare_amount` |
 | The Glue execution role is declared twice in Terraform, both mapping to the same physical role | Untangling needs a state operation; documented in architecture.md |
