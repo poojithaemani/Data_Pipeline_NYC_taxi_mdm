@@ -8,12 +8,20 @@
 # Setup required before this runs
 # ---------------------------------------------------------------------------
 # State lives in S3 (see terraform/versions.tf), so a runner can diff against
-# real infrastructure. The one thing still needed is the repository variable:
+# real infrastructure. Two things are needed:
 #
 #   vars.AWS_ROLE_ARN   the read-only plan role's ARN, output by Terraform as
 #                       github_actions_plan_role_arn
 #
-# Until it is set the job skips cleanly - green, not failed.
+#   secrets.TFVARS      the full contents of terraform/terraform.tfvars, which
+#                       is gitignored and therefore absent on the runner
+#
+# Until they are set the job skips cleanly - green, not failed.
+#
+# TFVARS carries the whole file rather than a variable-per-secret because a
+# plan is only worth reading if its inputs match the operator's exactly. Supply
+# a subset and Terraform falls back to defaults for the rest, producing a diff
+# that looks authoritative while proposing changes that are not real.
 
 name: Terraform Plan
 
@@ -42,6 +50,12 @@ jobs:
     # Skips cleanly when the backend and role have not been configured yet.
     if: vars.AWS_ROLE_ARN != ''
 
+    # Exposed as an env var so steps can guard on it. The secrets context is
+    # not available in a job-level if, and a pull request from a fork receives
+    # neither secrets nor an OIDC token - such a run skips rather than fails.
+    env:
+      TFVARS: ${{ secrets.TFVARS }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -64,12 +78,22 @@ jobs:
         working-directory: terraform
         run: terraform init -input=false
 
+      # terraform.tfvars is gitignored, so the runner has no variable values at
+      # all. Written as *.auto.tfvars so Terraform loads it without a -var-file
+      # flag, and matched by the existing *.tfvars gitignore rule so it cannot
+      # be committed even if the cleanup step were skipped.
+      - name: Materialise tfvars
+        if: env.TFVARS != ''
+        working-directory: terraform
+        run: printf '%s' "$TFVARS" > ci.auto.tfvars
+
       # -lock=false: a plan needs no state lock, and taking one from CI can
       # block an operator mid-apply.
       # No -out: a saved plan file embeds sensitive values in plaintext, so it
       # is never written and never uploaded as an artifact.
       - name: terraform plan
         id: plan
+        if: env.TFVARS != ''
         working-directory: terraform
         run: |
           set -o pipefail
@@ -80,8 +104,9 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       # Deleted explicitly rather than relied on being ephemeral, so a future
-      # artifact-upload step cannot pick it up by accident.
-      - name: Remove plan output
+      # artifact-upload step cannot pick them up by accident. ci.auto.tfvars
+      # holds the Redshift admin password in plaintext.
+      - name: Remove plan output and tfvars
         if: always()
         working-directory: terraform
-        run: rm -f plan.txt
+        run: rm -f plan.txt ci.auto.tfvars

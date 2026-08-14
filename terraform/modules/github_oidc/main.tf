@@ -18,11 +18,31 @@
 
 data "aws_caller_identity" "current" {}
 data "aws_partition" "current" {}
+data "aws_region" "current" {}
 
 locals {
   account_id = data.aws_caller_identity.current.account_id
   partition  = data.aws_partition.current.partition
   oidc_host  = "token.actions.githubusercontent.com"
+
+  # GitHub emits the subject claim in one of two shapes. The classic form is
+  # "repo:owner/name:context". The newer form embeds the immutable numeric
+  # account and repository IDs - "repo:owner@1234/name@5678:context" - so that
+  # renaming an account or repository cannot be used to impersonate it.
+  #
+  # Which form arrives is GitHub's decision, not ours, and it can change. Both
+  # exact strings are therefore accepted. StringEquals matches on any element
+  # of the list, so this is still an exact match against this repository - it
+  # is not a wildcard and does not widen the trust boundary.
+  plan_subjects = compact([
+    "repo:${var.github_repository}:pull_request",
+    var.github_repository_immutable != "" ? "repo:${var.github_repository_immutable}:pull_request" : "",
+  ])
+
+  apply_subjects = compact([
+    "repo:${var.github_repository}:environment:${var.apply_environment}",
+    var.github_repository_immutable != "" ? "repo:${var.github_repository_immutable}:environment:${var.apply_environment}" : "",
+  ])
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -63,7 +83,7 @@ data "aws_iam_policy_document" "plan_assume" {
     condition {
       test     = "StringEquals"
       variable = "${local.oidc_host}:sub"
-      values   = ["repo:${var.github_repository}:pull_request"]
+      values   = local.plan_subjects
     }
   }
 }
@@ -90,7 +110,7 @@ data "aws_iam_policy_document" "apply_assume" {
     condition {
       test     = "StringEquals"
       variable = "${local.oidc_host}:sub"
-      values   = ["repo:${var.github_repository}:environment:${var.apply_environment}"]
+      values   = local.apply_subjects
     }
   }
 }
@@ -144,6 +164,44 @@ data "aws_iam_policy_document" "plan_state" {
     effect    = "Allow"
     actions   = ["kms:Decrypt", "kms:DescribeKey"]
     resources = [var.kms_key_arn]
+  }
+
+  # Refreshing aws_secretsmanager_secret_version reads the secret string to
+  # detect drift, so a plan cannot complete without this. ReadOnlyAccess
+  # deliberately omits GetSecretValue because it returns credential material,
+  # which makes this an explicit, narrow exception rather than an oversight:
+  # exactly the two managed secret ARNs, and no other Secrets Manager action.
+  dynamic "statement" {
+    for_each = length(var.plan_readable_secret_arns) > 0 ? [1] : []
+
+    content {
+      sid       = "ReadManagedSecretValues"
+      effect    = "Allow"
+      actions   = ["secretsmanager:GetSecretValue"]
+      resources = var.plan_readable_secret_arns
+    }
+  }
+
+  # glue:GetConnection is omitted from ReadOnlyAccess for the same reason - a
+  # JDBC connection can carry a password. This one is a NETWORK connection
+  # holding only an availability zone, subnet and security group, but IAM
+  # cannot tell the two apart, so the grant names the single connection.
+  #
+  # The catalog ARN is required alongside it: Glue authorises GetConnection
+  # against both the catalog and the connection. Listing both keeps the scope
+  # intact - any other connection still fails its own resource check.
+  dynamic "statement" {
+    for_each = var.plan_readable_glue_connection_arn != "" ? [1] : []
+
+    content {
+      sid     = "ReadManagedGlueConnection"
+      effect  = "Allow"
+      actions = ["glue:GetConnection"]
+      resources = [
+        var.plan_readable_glue_connection_arn,
+        "arn:${local.partition}:glue:${data.aws_region.current.region}:${local.account_id}:catalog",
+      ]
+    }
   }
 }
 

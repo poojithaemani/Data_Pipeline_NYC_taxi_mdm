@@ -1,0 +1,13 @@
+# Line endings are normalised to LF in the working tree on every platform.
+#
+# Terraform deploys the Glue job scripts with source_hash = filemd5(...),
+# which hashes the bytes on disk. Without this file, a Windows checkout gets
+# CRLF and a Linux CI runner gets LF, so the same commit produces two
+# different hashes and every CI plan reports phantom changes to the script
+# objects in S3. eol=lf makes the checkout byte-identical everywhere.
+#
+# text=auto still lets Git detect binary files and leave them alone.
+
+* text=auto eol=lf
+
+*.py text eol=lf
