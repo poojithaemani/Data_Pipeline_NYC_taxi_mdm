@@ -1,0 +1,2326 @@
+{
+  "Status": 200,
+  "DashboardId": "nyc-taxi-executive-dashboard",
+  "Name": "NYC Taxi MDM - Executive Dashboard",
+  "ResourceStatus": "CREATION_SUCCESSFUL",
+  "Definition": {
+    "DataSetIdentifierDeclarations": [
+      {
+        "Identifier": "trips",
+        "DataSetArn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:dataset/nyc-taxi-trips-star"
+      }
+    ],
+    "Sheets": [
+      {
+        "SheetId": "sheet-overview",
+        "Name": "Executive Overview",
+        "FilterControls": [
+          {
+            "CrossSheet": {
+              "FilterControlId": "fc-date",
+              "SourceFilterId": "f-date"
+            }
+          },
+          {
+            "CrossSheet": {
+              "FilterControlId": "fc-borough",
+              "SourceFilterId": "f-borough"
+            }
+          },
+          {
+            "CrossSheet": {
+              "FilterControlId": "fc-zone",
+              "SourceFilterId": "f-zone"
+            }
+          },
+          {
+            "CrossSheet": {
+              "FilterControlId": "fc-vendor",
+              "SourceFilterId": "f-vendor"
+            }
+          },
+          {
+            "CrossSheet": {
+              "FilterControlId": "fc-payment",
+              "SourceFilterId": "f-payment"
+            }
+          }
+        ],
+        "Visuals": [
+          {
+            "KPIVisual": {
+              "VisualId": "kpi-trips",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Total Trips"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "Values": [
+                    {
+                      "NumericalMeasureField": {
+                        "FieldId": "kpi-trips-v",
+                        "Column": {
+                          "DataSetIdentifier": "trips",
+                          "ColumnName": "Total Trips"
+                        }
+                      }
+                    }
+                  ],
+                  "TargetValues": [],
+                  "TrendGroups": []
+                },
+                "SortConfiguration": {},
+                "KPIOptions": {
+                  "PrimaryValueFontConfiguration": {
+                    "FontSize": {
+                      "Relative": "EXTRA_LARGE"
+                    }
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "KPIVisual": {
+              "VisualId": "kpi-revenue",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Total Fare Revenue"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "Values": [
+                    {
+                      "NumericalMeasureField": {
+                        "FieldId": "kpi-revenue-v",
+                        "Column": {
+                          "DataSetIdentifier": "trips",
+                          "ColumnName": "Total Fare Revenue"
+                        }
+                      }
+                    }
+                  ],
+                  "TargetValues": [],
+                  "TrendGroups": []
+                },
+                "SortConfiguration": {},
+                "KPIOptions": {
+                  "PrimaryValueFontConfiguration": {
+                    "FontSize": {
+                      "Relative": "EXTRA_LARGE"
+                    }
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "KPIVisual": {
+              "VisualId": "kpi-avgfare",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Average Fare"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "Values": [
+                    {
+                      "NumericalMeasureField": {
+                        "FieldId": "kpi-avgfare-v",
+                        "Column": {
+                          "DataSetIdentifier": "trips",
+                          "ColumnName": "Average Fare"
+                        }
+                      }
+                    }
+                  ],
+                  "TargetValues": [],
+                  "TrendGroups": []
+                },
+                "SortConfiguration": {},
+                "KPIOptions": {
+                  "PrimaryValueFontConfiguration": {
+                    "FontSize": {
+                      "Relative": "EXTRA_LARGE"
+                    }
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "KPIVisual": {
+              "VisualId": "kpi-avgdist",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Average Trip Distance"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "Values": [
+                    {
+                      "NumericalMeasureField": {
+                        "FieldId": "kpi-avgdist-v",
+                        "Column": {
+                          "DataSetIdentifier": "trips",
+                          "ColumnName": "Average Trip Distance"
+                        }
+                      }
+                    }
+                  ],
+                  "TargetValues": [],
+                  "TrendGroups": []
+                },
+                "SortConfiguration": {},
+                "KPIOptions": {
+                  "PrimaryValueFontConfiguration": {
+                    "FontSize": {
+                      "Relative": "EXTRA_LARGE"
+                    }
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "LineChartVisual": {
+              "VisualId": "ln-daily-trips",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Daily Trip Volume"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "LineChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "DateDimensionField": {
+                          "FieldId": "d1",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "trip_date"
+                          },
+                          "DateGranularity": "DAY",
+                          "HierarchyId": "d1"
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m1",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {},
+                "Type": "LINE"
+              },
+              "Actions": [],
+              "ColumnHierarchies": [
+                {
+                  "DateTimeHierarchy": {
+                    "HierarchyId": "d1"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "LineChartVisual": {
+              "VisualId": "ln-daily-revenue",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Daily Fare Revenue"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "LineChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "DateDimensionField": {
+                          "FieldId": "d2",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "trip_date"
+                          },
+                          "DateGranularity": "DAY",
+                          "HierarchyId": "d2"
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m2",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Fare Revenue"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {},
+                "Type": "LINE"
+              },
+              "Actions": [],
+              "ColumnHierarchies": [
+                {
+                  "DateTimeHierarchy": {
+                    "HierarchyId": "d2"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-pickup-borough-o",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Pickup Borough"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d3",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "pickup_borough"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m3",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m3",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "PieChartVisual": {
+              "VisualId": "pi-payment-o",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Payment Type"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "PieChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d4",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "payment_description"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m4",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "SortConfiguration": {},
+                "DonutOptions": {
+                  "ArcOptions": {
+                    "ArcThickness": "MEDIUM"
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          }
+        ],
+        "Layouts": [
+          {
+            "Configuration": {
+              "GridLayout": {
+                "Elements": [
+                  {
+                    "ElementId": "fc-date",
+                    "ElementType": "FILTER_CONTROL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 8,
+                    "RowIndex": 0,
+                    "RowSpan": 2
+                  },
+                  {
+                    "ElementId": "fc-borough",
+                    "ElementType": "FILTER_CONTROL",
+                    "ColumnIndex": 8,
+                    "ColumnSpan": 7,
+                    "RowIndex": 0,
+                    "RowSpan": 2
+                  },
+                  {
+                    "ElementId": "fc-zone",
+                    "ElementType": "FILTER_CONTROL",
+                    "ColumnIndex": 15,
+                    "ColumnSpan": 7,
+                    "RowIndex": 0,
+                    "RowSpan": 2
+                  },
+                  {
+                    "ElementId": "fc-vendor",
+                    "ElementType": "FILTER_CONTROL",
+                    "ColumnIndex": 22,
+                    "ColumnSpan": 7,
+                    "RowIndex": 0,
+                    "RowSpan": 2
+                  },
+                  {
+                    "ElementId": "fc-payment",
+                    "ElementType": "FILTER_CONTROL",
+                    "ColumnIndex": 29,
+                    "ColumnSpan": 7,
+                    "RowIndex": 0,
+                    "RowSpan": 2
+                  },
+                  {
+                    "ElementId": "kpi-trips",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 9,
+                    "RowIndex": 2,
+                    "RowSpan": 5
+                  },
+                  {
+                    "ElementId": "kpi-revenue",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 9,
+                    "ColumnSpan": 9,
+                    "RowIndex": 2,
+                    "RowSpan": 5
+                  },
+                  {
+                    "ElementId": "kpi-avgfare",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 9,
+                    "RowIndex": 2,
+                    "RowSpan": 5
+                  },
+                  {
+                    "ElementId": "kpi-avgdist",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 27,
+                    "ColumnSpan": 9,
+                    "RowIndex": 2,
+                    "RowSpan": 5
+                  },
+                  {
+                    "ElementId": "ln-daily-trips",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 18,
+                    "RowIndex": 7,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "ln-daily-revenue",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 18,
+                    "RowIndex": 7,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-pickup-borough-o",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 18,
+                    "RowIndex": 15,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "pi-payment-o",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 18,
+                    "RowIndex": 15,
+                    "RowSpan": 8
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "ContentType": "INTERACTIVE"
+      },
+      {
+        "SheetId": "sheet-time",
+        "Name": "Time & Demand",
+        "Visuals": [
+          {
+            "LineChartVisual": {
+              "VisualId": "ln-daily-avgfare",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Daily Average Fare"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "LineChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "DateDimensionField": {
+                          "FieldId": "d5",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "trip_date"
+                          },
+                          "DateGranularity": "DAY",
+                          "HierarchyId": "d5"
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m5",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Average Fare"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {},
+                "Type": "LINE"
+              },
+              "Actions": [],
+              "ColumnHierarchies": [
+                {
+                  "DateTimeHierarchy": {
+                    "HierarchyId": "d5"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-hour",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Pickup Hour"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "NumericalDimensionField": {
+                          "FieldId": "d6",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "pickup_hour"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m6",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "d6",
+                        "Direction": "ASC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-dayname",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Day of Week"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d7",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "day_name"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m7",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m7",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "LineChartVisual": {
+              "VisualId": "ln-daily-dist",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Daily Average Trip Distance"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "LineChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "DateDimensionField": {
+                          "FieldId": "d8",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "trip_date"
+                          },
+                          "DateGranularity": "DAY",
+                          "HierarchyId": "d8"
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m8",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Average Trip Distance"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {},
+                "Type": "LINE"
+              },
+              "Actions": [],
+              "ColumnHierarchies": [
+                {
+                  "DateTimeHierarchy": {
+                    "HierarchyId": "d8"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "Layouts": [
+          {
+            "Configuration": {
+              "GridLayout": {
+                "Elements": [
+                  {
+                    "ElementId": "ln-daily-avgfare",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 36,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-hour",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 18,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-dayname",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 18,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "ln-daily-dist",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 36,
+                    "RowIndex": 16,
+                    "RowSpan": 8
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "ContentType": "INTERACTIVE"
+      },
+      {
+        "SheetId": "sheet-geography",
+        "Name": "Geography (MDM Zones)",
+        "Visuals": [
+          {
+            "BarChartVisual": {
+              "VisualId": "br-pickup-borough",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Pickup Borough"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d9",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "pickup_borough"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m9",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m9",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-dropoff-borough",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Dropoff Borough"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d10",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "dropoff_borough"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m10",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m10",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-service-zone",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Pickup Service Zone"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d11",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "pickup_service_zone"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m11",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m11",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-top-pickup-zones",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Top 15 Pickup Zones"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d12",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "pickup_zone_name"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m12",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m12",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ],
+                  "CategoryItemsLimit": {
+                    "ItemsLimit": 15,
+                    "OtherCategories": "EXCLUDE"
+                  },
+                  "ColorItemsLimit": {
+                    "OtherCategories": "EXCLUDE"
+                  },
+                  "SmallMultiplesLimitConfiguration": {
+                    "OtherCategories": "EXCLUDE"
+                  }
+                },
+                "Orientation": "HORIZONTAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-top-dropoff-zones",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Top 15 Dropoff Zones"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d13",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "dropoff_zone_name"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m13",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m13",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ],
+                  "CategoryItemsLimit": {
+                    "ItemsLimit": 15,
+                    "OtherCategories": "EXCLUDE"
+                  },
+                  "ColorItemsLimit": {
+                    "OtherCategories": "EXCLUDE"
+                  },
+                  "SmallMultiplesLimitConfiguration": {
+                    "OtherCategories": "EXCLUDE"
+                  }
+                },
+                "Orientation": "HORIZONTAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "HeatMapVisual": {
+              "VisualId": "hm-borough",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Pickup Borough to Dropoff Borough"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "HeatMapAggregatedFieldWells": {
+                    "Rows": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d14",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "pickup_borough"
+                          }
+                        }
+                      }
+                    ],
+                    "Columns": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d15",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "dropoff_borough"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m14",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "SortConfiguration": {}
+              },
+              "ColumnHierarchies": [],
+              "Actions": []
+            }
+          }
+        ],
+        "Layouts": [
+          {
+            "Configuration": {
+              "GridLayout": {
+                "Elements": [
+                  {
+                    "ElementId": "br-pickup-borough",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 12,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-dropoff-borough",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 12,
+                    "ColumnSpan": 12,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-service-zone",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 24,
+                    "ColumnSpan": 12,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-top-pickup-zones",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 18,
+                    "RowIndex": 8,
+                    "RowSpan": 10
+                  },
+                  {
+                    "ElementId": "br-top-dropoff-zones",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 18,
+                    "RowIndex": 8,
+                    "RowSpan": 10
+                  },
+                  {
+                    "ElementId": "hm-borough",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 36,
+                    "RowIndex": 18,
+                    "RowSpan": 10
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "ContentType": "INTERACTIVE"
+      },
+      {
+        "SheetId": "sheet-vendor-payment",
+        "Name": "Vendor & Payment",
+        "Visuals": [
+          {
+            "BarChartVisual": {
+              "VisualId": "br-vendor",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Vendor"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d16",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "vendor_code"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m15",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m15",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "PieChartVisual": {
+              "VisualId": "pi-vendor",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Vendor Share of Trips"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "PieChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d17",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "vendor_code"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m16",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "SortConfiguration": {},
+                "DonutOptions": {
+                  "ArcOptions": {
+                    "ArcThickness": "MEDIUM"
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-vendor-revenue",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Fare Revenue by Vendor"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d18",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "vendor_code"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m17",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Fare Revenue"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m17",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-payment",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trips by Payment Type"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d19",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "payment_description"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m18",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m18",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "PieChartVisual": {
+              "VisualId": "pi-payment",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Payment Type Distribution"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "PieChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d20",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "payment_description"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m19",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "SortConfiguration": {},
+                "DonutOptions": {
+                  "ArcOptions": {
+                    "ArcThickness": "MEDIUM"
+                  }
+                }
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-payment-tips",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Total Tips by Payment Type"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d21",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "payment_description"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m20",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Tips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "m20",
+                        "Direction": "DESC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          }
+        ],
+        "Layouts": [
+          {
+            "Configuration": {
+              "GridLayout": {
+                "Elements": [
+                  {
+                    "ElementId": "br-vendor",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 12,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "pi-vendor",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 12,
+                    "ColumnSpan": 12,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-vendor-revenue",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 24,
+                    "ColumnSpan": 12,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-payment",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 12,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "pi-payment",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 12,
+                    "ColumnSpan": 12,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-payment-tips",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 24,
+                    "ColumnSpan": 12,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "ContentType": "INTERACTIVE"
+      },
+      {
+        "SheetId": "sheet-trip-behaviour",
+        "Name": "Trip Behaviour",
+        "Visuals": [
+          {
+            "BarChartVisual": {
+              "VisualId": "br-distance-band",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Trip Distance Distribution"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d22",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "distance_band"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m21",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "d22",
+                        "Direction": "ASC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-fare-band",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Fare Distribution"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d23",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "fare_band"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m22",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "d23",
+                        "Direction": "ASC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-passengers",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Passenger Count Distribution"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "NumericalDimensionField": {
+                          "FieldId": "d24",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "passenger_count"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m23",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Total Trips"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "d24",
+                        "Direction": "ASC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          },
+          {
+            "BarChartVisual": {
+              "VisualId": "br-avgfare-distance",
+              "Title": {
+                "Visibility": "VISIBLE",
+                "FormatText": {
+                  "PlainText": "Average Fare by Distance Band"
+                }
+              },
+              "Subtitle": {
+                "Visibility": "VISIBLE"
+              },
+              "ChartConfiguration": {
+                "FieldWells": {
+                  "BarChartAggregatedFieldWells": {
+                    "Category": [
+                      {
+                        "CategoricalDimensionField": {
+                          "FieldId": "d25",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "distance_band"
+                          }
+                        }
+                      }
+                    ],
+                    "Values": [
+                      {
+                        "NumericalMeasureField": {
+                          "FieldId": "m24",
+                          "Column": {
+                            "DataSetIdentifier": "trips",
+                            "ColumnName": "Average Fare"
+                          }
+                        }
+                      }
+                    ],
+                    "Colors": []
+                  }
+                },
+                "SortConfiguration": {
+                  "CategorySort": [
+                    {
+                      "FieldSort": {
+                        "FieldId": "d25",
+                        "Direction": "ASC"
+                      }
+                    }
+                  ]
+                },
+                "Orientation": "VERTICAL",
+                "BarsArrangement": "CLUSTERED"
+              },
+              "Actions": [],
+              "ColumnHierarchies": []
+            }
+          }
+        ],
+        "Layouts": [
+          {
+            "Configuration": {
+              "GridLayout": {
+                "Elements": [
+                  {
+                    "ElementId": "br-distance-band",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 18,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-fare-band",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 18,
+                    "RowIndex": 0,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-passengers",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 0,
+                    "ColumnSpan": 18,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  },
+                  {
+                    "ElementId": "br-avgfare-distance",
+                    "ElementType": "VISUAL",
+                    "ColumnIndex": 18,
+                    "ColumnSpan": 18,
+                    "RowIndex": 8,
+                    "RowSpan": 8
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "ContentType": "INTERACTIVE"
+      }
+    ],
+    "CalculatedFields": [
+      {
+        "DataSetIdentifier": "trips",
+        "Name": "Average Fare",
+        "Expression": "sum({fare_amount}) / count(vendorid)"
+      },
+      {
+        "DataSetIdentifier": "trips",
+        "Name": "Average Trip Distance",
+        "Expression": "sum({trip_distance}) / count(vendorid)"
+      },
+      {
+        "DataSetIdentifier": "trips",
+        "Name": "Total Fare Revenue",
+        "Expression": "sum({fare_amount})"
+      },
+      {
+        "DataSetIdentifier": "trips",
+        "Name": "Total Tips",
+        "Expression": "sum({tip_amount})"
+      },
+      {
+        "DataSetIdentifier": "trips",
+        "Name": "Total Trips",
+        "Expression": "count(vendorid)"
+      },
+      {
+        "DataSetIdentifier": "trips",
+        "Name": "vendor_code",
+        "Expression": "toString(vendorid)"
+      }
+    ],
+    "ParameterDeclarations": [],
+    "FilterGroups": [
+      {
+        "FilterGroupId": "fg-date",
+        "Filters": [
+          {
+            "TimeRangeFilter": {
+              "FilterId": "f-date",
+              "Column": {
+                "DataSetIdentifier": "trips",
+                "ColumnName": "trip_date"
+              },
+              "IncludeMinimum": true,
+              "IncludeMaximum": true,
+              "RangeMinimumValue": {
+                "StaticValue": "2024-12-30 16:00:00-08:00"
+              },
+              "RangeMaximumValue": {
+                "StaticValue": "2025-02-01 15:59:59-08:00"
+              },
+              "NullOption": "ALL_VALUES",
+              "TimeGranularity": "DAY",
+              "DefaultFilterControlConfiguration": {
+                "Title": "Trip Date",
+                "ControlOptions": {
+                  "DefaultDateTimePickerOptions": {
+                    "Type": "DATE_RANGE",
+                    "DisplayOptions": {
+                      "TitleOptions": {
+                        "Visibility": "VISIBLE",
+                        "FontConfiguration": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "ScopeConfiguration": {
+          "SelectedSheets": {
+            "SheetVisualScopingConfigurations": [
+              {
+                "SheetId": "sheet-overview",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-time",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-geography",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-vendor-payment",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-trip-behaviour",
+                "Scope": "ALL_VISUALS"
+              }
+            ]
+          }
+        },
+        "Status": "ENABLED",
+        "CrossDataset": "SINGLE_DATASET"
+      },
+      {
+        "FilterGroupId": "fg-borough",
+        "Filters": [
+          {
+            "CategoryFilter": {
+              "FilterId": "f-borough",
+              "Column": {
+                "DataSetIdentifier": "trips",
+                "ColumnName": "pickup_borough"
+              },
+              "Configuration": {
+                "FilterListConfiguration": {
+                  "MatchOperator": "CONTAINS",
+                  "SelectAllOptions": "FILTER_ALL_VALUES",
+                  "NullOption": "NON_NULLS_ONLY"
+                }
+              },
+              "DefaultFilterControlConfiguration": {
+                "Title": "Pickup Borough",
+                "ControlOptions": {
+                  "DefaultDropdownOptions": {
+                    "DisplayOptions": {
+                      "SelectAllOptions": {
+                        "Visibility": "VISIBLE"
+                      },
+                      "TitleOptions": {
+                        "Visibility": "VISIBLE",
+                        "FontConfiguration": {}
+                      }
+                    },
+                    "Type": "MULTI_SELECT"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "ScopeConfiguration": {
+          "SelectedSheets": {
+            "SheetVisualScopingConfigurations": [
+              {
+                "SheetId": "sheet-overview",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-time",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-geography",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-vendor-payment",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-trip-behaviour",
+                "Scope": "ALL_VISUALS"
+              }
+            ]
+          }
+        },
+        "Status": "ENABLED",
+        "CrossDataset": "SINGLE_DATASET"
+      },
+      {
+        "FilterGroupId": "fg-zone",
+        "Filters": [
+          {
+            "CategoryFilter": {
+              "FilterId": "f-zone",
+              "Column": {
+                "DataSetIdentifier": "trips",
+                "ColumnName": "pickup_zone_name"
+              },
+              "Configuration": {
+                "FilterListConfiguration": {
+                  "MatchOperator": "CONTAINS",
+                  "SelectAllOptions": "FILTER_ALL_VALUES",
+                  "NullOption": "NON_NULLS_ONLY"
+                }
+              },
+              "DefaultFilterControlConfiguration": {
+                "Title": "Pickup Zone",
+                "ControlOptions": {
+                  "DefaultDropdownOptions": {
+                    "DisplayOptions": {
+                      "SelectAllOptions": {
+                        "Visibility": "VISIBLE"
+                      },
+                      "TitleOptions": {
+                        "Visibility": "VISIBLE",
+                        "FontConfiguration": {}
+                      }
+                    },
+                    "Type": "MULTI_SELECT"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "ScopeConfiguration": {
+          "SelectedSheets": {
+            "SheetVisualScopingConfigurations": [
+              {
+                "SheetId": "sheet-overview",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-time",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-geography",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-vendor-payment",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-trip-behaviour",
+                "Scope": "ALL_VISUALS"
+              }
+            ]
+          }
+        },
+        "Status": "ENABLED",
+        "CrossDataset": "SINGLE_DATASET"
+      },
+      {
+        "FilterGroupId": "fg-vendor",
+        "Filters": [
+          {
+            "CategoryFilter": {
+              "FilterId": "f-vendor",
+              "Column": {
+                "DataSetIdentifier": "trips",
+                "ColumnName": "vendor_code"
+              },
+              "Configuration": {
+                "FilterListConfiguration": {
+                  "MatchOperator": "CONTAINS",
+                  "SelectAllOptions": "FILTER_ALL_VALUES",
+                  "NullOption": "NON_NULLS_ONLY"
+                }
+              },
+              "DefaultFilterControlConfiguration": {
+                "Title": "Vendor",
+                "ControlOptions": {
+                  "DefaultDropdownOptions": {
+                    "DisplayOptions": {
+                      "SelectAllOptions": {
+                        "Visibility": "VISIBLE"
+                      },
+                      "TitleOptions": {
+                        "Visibility": "VISIBLE",
+                        "FontConfiguration": {}
+                      }
+                    },
+                    "Type": "MULTI_SELECT"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "ScopeConfiguration": {
+          "SelectedSheets": {
+            "SheetVisualScopingConfigurations": [
+              {
+                "SheetId": "sheet-overview",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-time",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-geography",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-vendor-payment",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-trip-behaviour",
+                "Scope": "ALL_VISUALS"
+              }
+            ]
+          }
+        },
+        "Status": "ENABLED",
+        "CrossDataset": "SINGLE_DATASET"
+      },
+      {
+        "FilterGroupId": "fg-payment",
+        "Filters": [
+          {
+            "CategoryFilter": {
+              "FilterId": "f-payment",
+              "Column": {
+                "DataSetIdentifier": "trips",
+                "ColumnName": "payment_description"
+              },
+              "Configuration": {
+                "FilterListConfiguration": {
+                  "MatchOperator": "CONTAINS",
+                  "SelectAllOptions": "FILTER_ALL_VALUES",
+                  "NullOption": "NON_NULLS_ONLY"
+                }
+              },
+              "DefaultFilterControlConfiguration": {
+                "Title": "Payment Type",
+                "ControlOptions": {
+                  "DefaultDropdownOptions": {
+                    "DisplayOptions": {
+                      "SelectAllOptions": {
+                        "Visibility": "VISIBLE"
+                      },
+                      "TitleOptions": {
+                        "Visibility": "VISIBLE",
+                        "FontConfiguration": {}
+                      }
+                    },
+                    "Type": "MULTI_SELECT"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "ScopeConfiguration": {
+          "SelectedSheets": {
+            "SheetVisualScopingConfigurations": [
+              {
+                "SheetId": "sheet-overview",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-time",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-geography",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-vendor-payment",
+                "Scope": "ALL_VISUALS"
+              },
+              {
+                "SheetId": "sheet-trip-behaviour",
+                "Scope": "ALL_VISUALS"
+              }
+            ]
+          }
+        },
+        "Status": "ENABLED",
+        "CrossDataset": "SINGLE_DATASET"
+      }
+    ]
+  },
+  "RequestId": "a10fab51-5d09-477f-ae80-18054c81aa64",
+  "DashboardPublishOptions": {
+    "AdHocFilteringOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "ExportToCSVOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "SheetControlsOption": {
+      "VisibilityState": "EXPANDED"
+    },
+    "SheetLayoutElementMaximizationOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "VisualMenuOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "VisualAxisSortOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "ExportWithHiddenFieldsOption": {
+      "AvailabilityStatus": "DISABLED"
+    },
+    "DataPointDrillUpDownOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "DataPointMenuLabelOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "DataPointTooltipOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "DataQAEnabledOption": {
+      "AvailabilityStatus": "DISABLED"
+    },
+    "ExecutiveSummaryOption": {
+      "AvailabilityStatus": "ENABLED"
+    },
+    "DataStoriesSharingOption": {
+      "AvailabilityStatus": "ENABLED"
+    }
+  }
+}

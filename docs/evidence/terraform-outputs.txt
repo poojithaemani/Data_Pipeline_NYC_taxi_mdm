@@ -1,0 +1,62 @@
+alerts_topic_arn = "arn:aws:sns:us-east-2:<ACCOUNT_ID>:nyc-taxi-mdm-platform-alerts"
+api_gateway_log_group = "/aws/apigateway/nyc-taxi-mdm-platform"
+athena_workgroup = "nyc-taxi-mdm-platform-workgroup"
+bronze_crawler_name = "bronze_crawler"
+delta_demo_job_name = "nyc-taxi-mdm-platform-delta-demo"
+github_actions_apply_role_arn = "arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-platform-gha-apply"
+github_actions_plan_role_arn = "arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-platform-gha-plan"
+github_oidc_provider_arn = "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+glue_bronze_db = "bronze_db"
+glue_gold_db = "gold_db"
+glue_log_group = "/aws-glue/jobs/nyc-taxi-mdm-platform"
+glue_master_db = "master_db"
+glue_role_arn = "arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-platform-glue-role"
+glue_security_group_id = "<SECURITY_GROUP_ID>"
+glue_silver_db = "silver_db"
+glue_vpc_connection_name = "nyc-taxi-mdm-platform-vpc"
+gold_crawler_name = "gold_crawler"
+gold_etl_job_name = "nyc-taxi-mdm-platform-yellow-taxi-gold-etl"
+gold_summary_table_names = [
+  "borough_summary",
+  "daily_summary",
+  "hourly_summary",
+  "payment_summary",
+  "vendor_summary",
+]
+golden_zone_etl_job_name = "nyc-taxi-mdm-platform-golden-zone-etl"
+kms_alias = "alias/nyc-taxi-mdm-platform"
+kms_key_arn = "arn:aws:kms:us-east-2:<ACCOUNT_ID>:key/f8320da1-0145-4898-8919-8defd97abe0b"
+lambda_log_group = "/aws/lambda/nyc-taxi-mdm-platform"
+monitoring_alarm_names = [
+  "nyc-taxi-mdm-platform-pipeline-execution-failed",
+  "nyc-taxi-mdm-platform-pipeline-execution-timed-out",
+  "nyc-taxi-mdm-platform-pipeline-execution-duration-high",
+  "nyc-taxi-mdm-platform-redshift-compute-seconds-high",
+]
+monitoring_dashboard_name = "nyc-taxi-mdm-platform-pipeline"
+nat_gateway_public_ip = "3.20.254.17"
+pipeline_copy_statement_count = 13
+pipeline_state_machine_arn = "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline"
+pipeline_state_machine_log_group = "/aws/vendedlogs/states/nyc-taxi-mdm-platform-pipeline"
+pipeline_state_machine_name = "nyc-taxi-mdm-platform-pipeline"
+rds_address = "<RDS_ENDPOINT>"
+rds_database = "taxi_mdm"
+rds_endpoint = "<RDS_ENDPOINT>:5432"
+rds_master_secret_arn = "arn:aws:secretsmanager:us-east-2:<ACCOUNT_ID>:secret:nyc-taxi-mdm-platform/rds/master-<SUFFIX>"
+rds_master_secret_name = "nyc-taxi-mdm-platform/rds/master"
+rds_security_group = "<SECURITY_GROUP_ID>"
+redshift_admin_secret_arn = "arn:aws:secretsmanager:us-east-2:<ACCOUNT_ID>:secret:nyc-taxi-mdm-platform/redshift/admin-<SUFFIX>"
+redshift_admin_secret_name = "nyc-taxi-mdm-platform/redshift/admin"
+redshift_database = "taxi_analytics"
+redshift_endpoint = "<REDSHIFT_ENDPOINT>"
+redshift_iam_role_arn = "arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-redshift-role"
+redshift_namespace = "nyc-taxi-mdm"
+redshift_port = 5439
+redshift_security_group = "<SECURITY_GROUP_ID>"
+redshift_workgroup = "nyc-taxi-mdm-wg"
+s3_vpc_endpoint_id = "vpce-0c528846e55952416"
+silver_crawler_name = "silver_crawler"
+silver_etl_job_name = "nyc-taxi-mdm-platform-yellow-taxi-silver-etl"
+sync_pipeline_runs_job_name = "nyc-taxi-mdm-platform-sync-pipeline-runs"
+tfstate_bucket = "nyc-taxi-mdm-platform-tfstate-<ACCOUNT_ID>"
+warehouse_export_etl_job_name = "nyc-taxi-mdm-platform-warehouse-export-etl"

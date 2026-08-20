@@ -1,0 +1,47 @@
+[
+  {
+    "executionArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:execution:nyc-taxi-mdm-platform-pipeline:542f5d9f-c41f-4f4c-ae7b-ab1f03378920",
+    "stateMachineArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline",
+    "name": "542f5d9f-c41f-4f4c-ae7b-ab1f03378920",
+    "status": "SUCCEEDED",
+    "startDate": "2026-08-11 15:34:37.799000-07:00",
+    "stopDate": "2026-08-11 15:49:25.305000-07:00",
+    "redriveCount": 0
+  },
+  {
+    "executionArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:execution:nyc-taxi-mdm-platform-pipeline:acb81d47-f4d8-4c0e-9fb5-49ced21da336",
+    "stateMachineArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline",
+    "name": "acb81d47-f4d8-4c0e-9fb5-49ced21da336",
+    "status": "SUCCEEDED",
+    "startDate": "2026-08-11 14:29:55.031000-07:00",
+    "stopDate": "2026-08-11 14:43:21.081000-07:00",
+    "redriveCount": 0
+  },
+  {
+    "executionArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:execution:nyc-taxi-mdm-platform-pipeline:6fc1eff7-7368-457a-ac12-8f3e0a8c4bb9",
+    "stateMachineArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline",
+    "name": "6fc1eff7-7368-457a-ac12-8f3e0a8c4bb9",
+    "status": "FAILED",
+    "startDate": "2026-08-11 12:06:44.932000-07:00",
+    "stopDate": "2026-08-11 12:17:34.342000-07:00",
+    "redriveCount": 0
+  },
+  {
+    "executionArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:execution:nyc-taxi-mdm-platform-pipeline:56841d7c-8a89-4abd-bed0-7a1ed24e5284",
+    "stateMachineArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline",
+    "name": "56841d7c-8a89-4abd-bed0-7a1ed24e5284",
+    "status": "FAILED",
+    "startDate": "2026-08-11 11:45:02.762000-07:00",
+    "stopDate": "2026-08-11 11:56:27.925000-07:00",
+    "redriveCount": 0
+  },
+  {
+    "executionArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:execution:nyc-taxi-mdm-platform-pipeline:7021ec09-b703-4e72-a54d-ce5c10821de3",
+    "stateMachineArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline",
+    "name": "7021ec09-b703-4e72-a54d-ce5c10821de3",
+    "status": "FAILED",
+    "startDate": "2026-08-11 11:20:48.051000-07:00",
+    "stopDate": "2026-08-11 11:33:04.033000-07:00",
+    "redriveCount": 0
+  }
+]

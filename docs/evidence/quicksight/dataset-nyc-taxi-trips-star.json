@@ -1,0 +1,671 @@
+{
+  "Status": 200,
+  "DataSet": {
+    "Arn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:dataset/nyc-taxi-trips-star",
+    "DataSetId": "nyc-taxi-trips-star",
+    "Name": "NYC Taxi Trips (Star Schema)",
+    "CreatedTime": "2026-08-10 16:47:43.810000-07:00",
+    "LastUpdatedTime": "2026-08-11 15:49:17.764000-07:00",
+    "PhysicalTableMap": {
+      "dd": {
+        "RelationalTable": {
+          "DataSourceArn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:datasource/nyc-taxi-mdm-redshift",
+          "Schema": "public",
+          "Name": "dim_date",
+          "InputColumns": [
+            {
+              "Name": "date_key",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "full_date",
+              "Type": "DATETIME"
+            },
+            {
+              "Name": "year",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "month",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "day",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "day_of_week",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "day_name",
+              "Type": "STRING"
+            },
+            {
+              "Name": "is_weekend",
+              "Type": "BOOLEAN"
+            }
+          ]
+        }
+      },
+      "dp": {
+        "RelationalTable": {
+          "DataSourceArn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:datasource/nyc-taxi-mdm-redshift",
+          "Schema": "public",
+          "Name": "dim_payment",
+          "InputColumns": [
+            {
+              "Name": "payment_type",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "payment_description",
+              "Type": "STRING"
+            }
+          ]
+        }
+      },
+      "dz": {
+        "RelationalTable": {
+          "DataSourceArn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:datasource/nyc-taxi-mdm-redshift",
+          "Schema": "public",
+          "Name": "dim_zone",
+          "InputColumns": [
+            {
+              "Name": "location_id",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "borough",
+              "Type": "STRING"
+            },
+            {
+              "Name": "zone",
+              "Type": "STRING"
+            },
+            {
+              "Name": "service_zone",
+              "Type": "STRING"
+            },
+            {
+              "Name": "golden_zone_row_id",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "version",
+              "Type": "INTEGER"
+            }
+          ]
+        }
+      },
+      "ft": {
+        "RelationalTable": {
+          "DataSourceArn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:datasource/nyc-taxi-mdm-redshift",
+          "Schema": "public",
+          "Name": "fact_trips",
+          "InputColumns": [
+            {
+              "Name": "vendorid",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "pickup_datetime",
+              "Type": "DATETIME"
+            },
+            {
+              "Name": "dropoff_datetime",
+              "Type": "DATETIME"
+            },
+            {
+              "Name": "date_key",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "pickup_location_id",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "dropoff_location_id",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "payment_type",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "passenger_count",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "trip_distance",
+              "Type": "DECIMAL",
+              "SubType": "FIXED"
+            },
+            {
+              "Name": "fare_amount",
+              "Type": "DECIMAL",
+              "SubType": "FIXED"
+            },
+            {
+              "Name": "tip_amount",
+              "Type": "DECIMAL",
+              "SubType": "FIXED"
+            },
+            {
+              "Name": "total_amount",
+              "Type": "DECIMAL",
+              "SubType": "FIXED"
+            }
+          ]
+        }
+      },
+      "pz": {
+        "RelationalTable": {
+          "DataSourceArn": "arn:aws:quicksight:us-east-2:<ACCOUNT_ID>:datasource/nyc-taxi-mdm-redshift",
+          "Schema": "public",
+          "Name": "dim_zone",
+          "InputColumns": [
+            {
+              "Name": "location_id",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "borough",
+              "Type": "STRING"
+            },
+            {
+              "Name": "zone",
+              "Type": "STRING"
+            },
+            {
+              "Name": "service_zone",
+              "Type": "STRING"
+            },
+            {
+              "Name": "golden_zone_row_id",
+              "Type": "INTEGER"
+            },
+            {
+              "Name": "version",
+              "Type": "INTEGER"
+            }
+          ]
+        }
+      }
+    },
+    "LogicalTableMap": {
+      "J1": {
+        "Alias": "trips_pickup_zone",
+        "Source": {
+          "JoinInstruction": {
+            "LeftOperand": "Lft",
+            "RightOperand": "Lpz",
+            "Type": "LEFT",
+            "OnClause": "{pickup_location_id} = {pickup_zone_id}"
+          }
+        }
+      },
+      "J2": {
+        "Alias": "trips_dropoff_zone",
+        "Source": {
+          "JoinInstruction": {
+            "LeftOperand": "J1",
+            "RightOperand": "Ldz",
+            "Type": "LEFT",
+            "OnClause": "{dropoff_location_id} = {dropoff_zone_id}"
+          }
+        }
+      },
+      "J3": {
+        "Alias": "trips_date",
+        "Source": {
+          "JoinInstruction": {
+            "LeftOperand": "J2",
+            "RightOperand": "Ldd",
+            "Type": "LEFT",
+            "OnClause": "{date_key} = {dim_date_key}"
+          }
+        }
+      },
+      "J4": {
+        "Alias": "nyc_taxi_trips_star",
+        "DataTransforms": [
+          {
+            "CreateColumnsOperation": {
+              "Columns": [
+                {
+                  "ColumnName": "pickup_hour",
+                  "ColumnId": "pickup_hour",
+                  "Expression": "extract('HH', {pickup_datetime})"
+                }
+              ]
+            }
+          },
+          {
+            "CreateColumnsOperation": {
+              "Columns": [
+                {
+                  "ColumnName": "distance_band",
+                  "ColumnId": "distance_band",
+                  "Expression": "ifelse({trip_distance} < 1, '1. 0-1 mi', {trip_distance} < 2, '2. 1-2 mi', {trip_distance} < 5, '3. 2-5 mi', {trip_distance} < 10, '4. 5-10 mi', {trip_distance} < 20, '5. 10-20 mi', '6. 20+ mi')"
+                }
+              ]
+            }
+          },
+          {
+            "CreateColumnsOperation": {
+              "Columns": [
+                {
+                  "ColumnName": "fare_band",
+                  "ColumnId": "fare_band",
+                  "Expression": "ifelse({fare_amount} < 10, '1. $0-10', {fare_amount} < 20, '2. $10-20', {fare_amount} < 30, '3. $20-30', {fare_amount} < 50, '4. $30-50', {fare_amount} < 100, '5. $50-100', '6. $100+')"
+                }
+              ]
+            }
+          },
+          {
+            "ProjectOperation": {
+              "ProjectedColumns": [
+                "vendorid",
+                "pickup_datetime",
+                "dropoff_datetime",
+                "date_key",
+                "pickup_location_id",
+                "dropoff_location_id",
+                "payment_type",
+                "passenger_count",
+                "trip_distance",
+                "fare_amount",
+                "tip_amount",
+                "total_amount",
+                "pickup_zone_id",
+                "pickup_borough",
+                "pickup_zone_name",
+                "pickup_service_zone",
+                "pickup_golden_zone_row_id",
+                "pickup_zone_version",
+                "dropoff_zone_id",
+                "dropoff_borough",
+                "dropoff_zone_name",
+                "dropoff_service_zone",
+                "dropoff_golden_zone_row_id",
+                "dropoff_zone_version",
+                "dim_date_key",
+                "trip_date",
+                "trip_year",
+                "trip_month",
+                "trip_day",
+                "trip_day_of_week",
+                "day_name",
+                "is_weekend",
+                "dim_payment_type",
+                "payment_description",
+                "pickup_hour",
+                "distance_band",
+                "fare_band"
+              ]
+            }
+          }
+        ],
+        "Source": {
+          "JoinInstruction": {
+            "LeftOperand": "J3",
+            "RightOperand": "Ldp",
+            "Type": "LEFT",
+            "OnClause": "{payment_type} = {dim_payment_type}"
+          }
+        }
+      },
+      "Ldd": {
+        "Alias": "dim_date",
+        "DataTransforms": [
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "date_key",
+              "NewColumnName": "dim_date_key"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "full_date",
+              "NewColumnName": "trip_date"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "year",
+              "NewColumnName": "trip_year"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "month",
+              "NewColumnName": "trip_month"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "day",
+              "NewColumnName": "trip_day"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "day_of_week",
+              "NewColumnName": "trip_day_of_week"
+            }
+          }
+        ],
+        "Source": {
+          "PhysicalTableId": "dd"
+        }
+      },
+      "Ldp": {
+        "Alias": "dim_payment",
+        "DataTransforms": [
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "payment_type",
+              "NewColumnName": "dim_payment_type"
+            }
+          }
+        ],
+        "Source": {
+          "PhysicalTableId": "dp"
+        }
+      },
+      "Ldz": {
+        "Alias": "dropoff_zone",
+        "DataTransforms": [
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "location_id",
+              "NewColumnName": "dropoff_zone_id"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "borough",
+              "NewColumnName": "dropoff_borough"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "zone",
+              "NewColumnName": "dropoff_zone_name"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "service_zone",
+              "NewColumnName": "dropoff_service_zone"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "golden_zone_row_id",
+              "NewColumnName": "dropoff_golden_zone_row_id"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "version",
+              "NewColumnName": "dropoff_zone_version"
+            }
+          }
+        ],
+        "Source": {
+          "PhysicalTableId": "dz"
+        }
+      },
+      "Lft": {
+        "Alias": "fact_trips",
+        "Source": {
+          "PhysicalTableId": "ft"
+        }
+      },
+      "Lpz": {
+        "Alias": "pickup_zone",
+        "DataTransforms": [
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "location_id",
+              "NewColumnName": "pickup_zone_id"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "borough",
+              "NewColumnName": "pickup_borough"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "zone",
+              "NewColumnName": "pickup_zone_name"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "service_zone",
+              "NewColumnName": "pickup_service_zone"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "golden_zone_row_id",
+              "NewColumnName": "pickup_golden_zone_row_id"
+            }
+          },
+          {
+            "RenameColumnOperation": {
+              "ColumnName": "version",
+              "NewColumnName": "pickup_zone_version"
+            }
+          }
+        ],
+        "Source": {
+          "PhysicalTableId": "pz"
+        }
+      }
+    },
+    "OutputColumns": [
+      {
+        "Name": "vendorid",
+        "Id": "Lft.vendorid",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "pickup_datetime",
+        "Id": "Lft.pickup_datetime",
+        "Type": "DATETIME"
+      },
+      {
+        "Name": "dropoff_datetime",
+        "Id": "Lft.dropoff_datetime",
+        "Type": "DATETIME"
+      },
+      {
+        "Name": "date_key",
+        "Id": "Lft.date_key",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "pickup_location_id",
+        "Id": "Lft.pickup_location_id",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "dropoff_location_id",
+        "Id": "Lft.dropoff_location_id",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "payment_type",
+        "Id": "Lft.payment_type",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "passenger_count",
+        "Id": "Lft.passenger_count",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "trip_distance",
+        "Id": "Lft.trip_distance",
+        "Type": "DECIMAL",
+        "SubType": "FIXED"
+      },
+      {
+        "Name": "fare_amount",
+        "Id": "Lft.fare_amount",
+        "Type": "DECIMAL",
+        "SubType": "FIXED"
+      },
+      {
+        "Name": "tip_amount",
+        "Id": "Lft.tip_amount",
+        "Type": "DECIMAL",
+        "SubType": "FIXED"
+      },
+      {
+        "Name": "total_amount",
+        "Id": "Lft.total_amount",
+        "Type": "DECIMAL",
+        "SubType": "FIXED"
+      },
+      {
+        "Name": "pickup_zone_id",
+        "Id": "Lpz.location_id",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "pickup_borough",
+        "Id": "Lpz.borough",
+        "Type": "STRING"
+      },
+      {
+        "Name": "pickup_zone_name",
+        "Id": "Lpz.zone",
+        "Type": "STRING"
+      },
+      {
+        "Name": "pickup_service_zone",
+        "Id": "Lpz.service_zone",
+        "Type": "STRING"
+      },
+      {
+        "Name": "pickup_golden_zone_row_id",
+        "Id": "Lpz.golden_zone_row_id",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "pickup_zone_version",
+        "Id": "Lpz.version",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "dropoff_zone_id",
+        "Id": "Ldz.location_id",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "dropoff_borough",
+        "Id": "Ldz.borough",
+        "Type": "STRING"
+      },
+      {
+        "Name": "dropoff_zone_name",
+        "Id": "Ldz.zone",
+        "Type": "STRING"
+      },
+      {
+        "Name": "dropoff_service_zone",
+        "Id": "Ldz.service_zone",
+        "Type": "STRING"
+      },
+      {
+        "Name": "dropoff_golden_zone_row_id",
+        "Id": "Ldz.golden_zone_row_id",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "dropoff_zone_version",
+        "Id": "Ldz.version",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "dim_date_key",
+        "Id": "Ldd.date_key",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "trip_date",
+        "Id": "Ldd.full_date",
+        "Type": "DATETIME"
+      },
+      {
+        "Name": "trip_year",
+        "Id": "Ldd.year",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "trip_month",
+        "Id": "Ldd.month",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "trip_day",
+        "Id": "Ldd.day",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "trip_day_of_week",
+        "Id": "Ldd.day_of_week",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "day_name",
+        "Id": "Ldd.day_name",
+        "Type": "STRING"
+      },
+      {
+        "Name": "is_weekend",
+        "Id": "Ldd.is_weekend",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "dim_payment_type",
+        "Id": "Ldp.payment_type",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "payment_description",
+        "Id": "Ldp.payment_description",
+        "Type": "STRING"
+      },
+      {
+        "Name": "pickup_hour",
+        "Id": "pickup_hour",
+        "Type": "INTEGER"
+      },
+      {
+        "Name": "distance_band",
+        "Id": "distance_band",
+        "Type": "STRING"
+      },
+      {
+        "Name": "fare_band",
+        "Id": "fare_band",
+        "Type": "STRING"
+      }
+    ],
+    "ImportMode": "SPICE",
+    "ConsumedSpiceCapacityInBytes": 1913581459,
+    "DataSetUsageConfiguration": {
+      "DisableUseAsDirectQuerySource": false,
+      "DisableUseAsImportedSource": false
+    }
+  },
+  "RequestId": "0e0d33c8-28e6-437f-bfca-8119deb0106f"
+}

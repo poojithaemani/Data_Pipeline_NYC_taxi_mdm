@@ -1,0 +1,845 @@
+{
+  "execution": {
+    "executionArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:execution:nyc-taxi-mdm-platform-pipeline:6fc1eff7-7368-457a-ac12-8f3e0a8c4bb9",
+    "stateMachineArn": "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline",
+    "name": "6fc1eff7-7368-457a-ac12-8f3e0a8c4bb9",
+    "status": "FAILED",
+    "startDate": "2026-08-11 12:06:44.932000-07:00",
+    "stopDate": "2026-08-11 12:17:34.342000-07:00",
+    "redriveCount": 0
+  },
+  "events": [
+    {
+      "timestamp": "2026-08-11 12:06:44.932000-07:00",
+      "type": "ExecutionStarted",
+      "id": 1,
+      "previousEventId": 0,
+      "executionStartedEventDetails": {
+        "input": "{}",
+        "inputDetails": {
+          "truncated": false
+        },
+        "roleArn": "arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-platform-sfn-role"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:06:44.950000-07:00",
+      "type": "TaskStateEntered",
+      "id": 2,
+      "previousEventId": 0,
+      "stateEnteredEventDetails": {
+        "name": "SilverETL",
+        "input": "{}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:06:44.950000-07:00",
+      "type": "TaskScheduled",
+      "id": 3,
+      "previousEventId": 2,
+      "taskScheduledEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "region": "us-east-2",
+        "parameters": "{\"JobName\":\"nyc-taxi-mdm-platform-yellow-taxi-silver-etl\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:06:44.989000-07:00",
+      "type": "TaskStarted",
+      "id": 4,
+      "previousEventId": 3,
+      "taskStartedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:06:45.146000-07:00",
+      "type": "TaskSubmitted",
+      "id": 5,
+      "previousEventId": 4,
+      "taskSubmittedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"JobRunId\":\"jr_d567f901e8f83a20e40f1eaf53575e8b7866f36246c3c3a3facb032ce6ad8943\",\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"Cache-Control\":[\"no-cache\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"600cb9b8-0c99-4583-96e2-102957fa1926\"],\"Content-Length\":[\"82\"],\"Date\":[\"Tue, 11 Aug 2026 19:06:45 GMT\"],\"Content-Type\":[\"application/x-amz-json-1.1\"]},\"HttpHeaders\":{\"Cache-Control\":\"no-cache\",\"Connection\":\"keep-alive\",\"Content-Length\":\"82\",\"Content-Type\":\"application/x-amz-json-1.1\",\"Date\":\"Tue, 11 Aug 2026 19:06:45 GMT\",\"x-amzn-RequestId\":\"600cb9b8-0c99-4583-96e2-102957fa1926\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"600cb9b8-0c99-4583-96e2-102957fa1926\"},\"JobName\":\"nyc-taxi-mdm-platform-yellow-taxi-silver-etl\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:09:45.411000-07:00",
+      "type": "TaskSucceeded",
+      "id": 6,
+      "previousEventId": 5,
+      "taskSucceededEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"AllocatedCapacity\":2,\"Attempt\":0,\"CompletedOn\":1786475365501,\"DPUSeconds\":308.0,\"ExecutionTime\":154,\"GlueVersion\":\"4.0\",\"Id\":\"jr_d567f901e8f83a20e40f1eaf53575e8b7866f36246c3c3a3facb032ce6ad8943\",\"JobMode\":\"SCRIPT\",\"JobName\":\"nyc-taxi-mdm-platform-yellow-taxi-silver-etl\",\"JobRunState\":\"SUCCEEDED\",\"LastModifiedOn\":1786475365501,\"LogGroupName\":\"/aws-glue/jobs\",\"MaxCapacity\":2.0,\"NumberOfWorkers\":2,\"PredecessorRuns\":[],\"StartedOn\":1786475205107,\"Timeout\":2880,\"WorkerType\":\"G.1X\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:09:45.423000-07:00",
+      "type": "TaskStateExited",
+      "id": 7,
+      "previousEventId": 6,
+      "stateExitedEventDetails": {
+        "name": "SilverETL",
+        "output": "{}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:09:45.423000-07:00",
+      "type": "TaskStateEntered",
+      "id": 8,
+      "previousEventId": 7,
+      "stateEnteredEventDetails": {
+        "name": "GoldETL",
+        "input": "{}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:09:45.423000-07:00",
+      "type": "TaskScheduled",
+      "id": 9,
+      "previousEventId": 8,
+      "taskScheduledEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "region": "us-east-2",
+        "parameters": "{\"JobName\":\"nyc-taxi-mdm-platform-yellow-taxi-gold-etl\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:09:45.470000-07:00",
+      "type": "TaskStarted",
+      "id": 10,
+      "previousEventId": 9,
+      "taskStartedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:09:45.620000-07:00",
+      "type": "TaskSubmitted",
+      "id": 11,
+      "previousEventId": 10,
+      "taskSubmittedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"JobRunId\":\"jr_6ecde0bf76588142479f9a8a950a379cc9633ba20d47b74a80942d0f53813f1c\",\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"Cache-Control\":[\"no-cache\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"80d9a15a-879a-4e44-9fcb-e5a787f282b5\"],\"Content-Length\":[\"82\"],\"Date\":[\"Tue, 11 Aug 2026 19:09:45 GMT\"],\"Content-Type\":[\"application/x-amz-json-1.1\"]},\"HttpHeaders\":{\"Cache-Control\":\"no-cache\",\"Connection\":\"keep-alive\",\"Content-Length\":\"82\",\"Content-Type\":\"application/x-amz-json-1.1\",\"Date\":\"Tue, 11 Aug 2026 19:09:45 GMT\",\"x-amzn-RequestId\":\"80d9a15a-879a-4e44-9fcb-e5a787f282b5\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"80d9a15a-879a-4e44-9fcb-e5a787f282b5\"},\"JobName\":\"nyc-taxi-mdm-platform-yellow-taxi-gold-etl\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:12:46.845000-07:00",
+      "type": "TaskSucceeded",
+      "id": 12,
+      "previousEventId": 11,
+      "taskSucceededEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"AllocatedCapacity\":2,\"Attempt\":0,\"CompletedOn\":1786475548941,\"DPUSeconds\":319.0,\"ExecutionTime\":159,\"GlueVersion\":\"4.0\",\"Id\":\"jr_6ecde0bf76588142479f9a8a950a379cc9633ba20d47b74a80942d0f53813f1c\",\"JobMode\":\"SCRIPT\",\"JobName\":\"nyc-taxi-mdm-platform-yellow-taxi-gold-etl\",\"JobRunState\":\"SUCCEEDED\",\"LastModifiedOn\":1786475548941,\"LogGroupName\":\"/aws-glue/jobs\",\"MaxCapacity\":2.0,\"NumberOfWorkers\":2,\"PredecessorRuns\":[],\"StartedOn\":1786475385585,\"Timeout\":2880,\"WorkerType\":\"G.1X\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:12:46.861000-07:00",
+      "type": "TaskStateExited",
+      "id": 13,
+      "previousEventId": 12,
+      "stateExitedEventDetails": {
+        "name": "GoldETL",
+        "output": "{}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:12:46.861000-07:00",
+      "type": "TaskStateEntered",
+      "id": 14,
+      "previousEventId": 13,
+      "stateEnteredEventDetails": {
+        "name": "GoldenZoneETL",
+        "input": "{}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:12:46.861000-07:00",
+      "type": "TaskScheduled",
+      "id": 15,
+      "previousEventId": 14,
+      "taskScheduledEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "region": "us-east-2",
+        "parameters": "{\"JobName\":\"nyc-taxi-mdm-platform-golden-zone-etl\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:12:46.907000-07:00",
+      "type": "TaskStarted",
+      "id": 16,
+      "previousEventId": 15,
+      "taskStartedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:12:47.045000-07:00",
+      "type": "TaskSubmitted",
+      "id": 17,
+      "previousEventId": 16,
+      "taskSubmittedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"JobRunId\":\"jr_5a207b8da630b99862390b406fb665494d2c2fd899efaae56981dbfbc1037d55\",\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"Cache-Control\":[\"no-cache\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"7220c1ff-8e4b-40c4-beaf-a777835696d0\"],\"Content-Length\":[\"82\"],\"Date\":[\"Tue, 11 Aug 2026 19:12:47 GMT\"],\"Content-Type\":[\"application/x-amz-json-1.1\"]},\"HttpHeaders\":{\"Cache-Control\":\"no-cache\",\"Connection\":\"keep-alive\",\"Content-Length\":\"82\",\"Content-Type\":\"application/x-amz-json-1.1\",\"Date\":\"Tue, 11 Aug 2026 19:12:47 GMT\",\"x-amzn-RequestId\":\"7220c1ff-8e4b-40c4-beaf-a777835696d0\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"7220c1ff-8e4b-40c4-beaf-a777835696d0\"},\"JobName\":\"nyc-taxi-mdm-platform-golden-zone-etl\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:14:52.245000-07:00",
+      "type": "TaskSucceeded",
+      "id": 18,
+      "previousEventId": 17,
+      "taskSucceededEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"AllocatedCapacity\":2,\"Attempt\":0,\"CompletedOn\":1786475663839,\"DPUSeconds\":186.0,\"ExecutionTime\":93,\"GlueVersion\":\"4.0\",\"Id\":\"jr_5a207b8da630b99862390b406fb665494d2c2fd899efaae56981dbfbc1037d55\",\"JobMode\":\"SCRIPT\",\"JobName\":\"nyc-taxi-mdm-platform-golden-zone-etl\",\"JobRunState\":\"SUCCEEDED\",\"LastModifiedOn\":1786475663839,\"LogGroupName\":\"/aws-glue/jobs\",\"MaxCapacity\":2.0,\"NumberOfWorkers\":2,\"PredecessorRuns\":[],\"StartedOn\":1786475567009,\"Timeout\":2880,\"WorkerType\":\"G.1X\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:14:52.269000-07:00",
+      "type": "TaskStateExited",
+      "id": 19,
+      "previousEventId": 18,
+      "stateExitedEventDetails": {
+        "name": "GoldenZoneETL",
+        "output": "{}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:14:52.269000-07:00",
+      "type": "TaskStateEntered",
+      "id": 20,
+      "previousEventId": 19,
+      "stateEnteredEventDetails": {
+        "name": "WarehouseExport",
+        "input": "{}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:14:52.269000-07:00",
+      "type": "TaskScheduled",
+      "id": 21,
+      "previousEventId": 20,
+      "taskScheduledEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "region": "us-east-2",
+        "parameters": "{\"JobName\":\"nyc-taxi-mdm-platform-warehouse-export-etl\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:14:52.325000-07:00",
+      "type": "TaskStarted",
+      "id": 22,
+      "previousEventId": 21,
+      "taskStartedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:14:52.432000-07:00",
+      "type": "TaskSubmitted",
+      "id": 23,
+      "previousEventId": 22,
+      "taskSubmittedEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"JobRunId\":\"jr_9b64986eadcea66401d15b95c23c955012ef13b218d8737e2f025d2247a1c4db\",\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"Cache-Control\":[\"no-cache\"],\"Connection\":[\"keep-alive\"],\"x-amzn-RequestId\":[\"ddb32152-526f-46f9-876a-a31105c582ee\"],\"Content-Length\":[\"82\"],\"Date\":[\"Tue, 11 Aug 2026 19:14:52 GMT\"],\"Content-Type\":[\"application/x-amz-json-1.1\"]},\"HttpHeaders\":{\"Cache-Control\":\"no-cache\",\"Connection\":\"keep-alive\",\"Content-Length\":\"82\",\"Content-Type\":\"application/x-amz-json-1.1\",\"Date\":\"Tue, 11 Aug 2026 19:14:52 GMT\",\"x-amzn-RequestId\":\"ddb32152-526f-46f9-876a-a31105c582ee\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"ddb32152-526f-46f9-876a-a31105c582ee\"},\"JobName\":\"nyc-taxi-mdm-platform-warehouse-export-etl\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:02.604000-07:00",
+      "type": "TaskSucceeded",
+      "id": 24,
+      "previousEventId": 23,
+      "taskSucceededEventDetails": {
+        "resourceType": "glue",
+        "resource": "startJobRun.sync",
+        "output": "{\"AllocatedCapacity\":2,\"Attempt\":0,\"CompletedOn\":1786475820331,\"DPUSeconds\":248.0,\"ExecutionTime\":124,\"GlueVersion\":\"4.0\",\"Id\":\"jr_9b64986eadcea66401d15b95c23c955012ef13b218d8737e2f025d2247a1c4db\",\"JobMode\":\"SCRIPT\",\"JobName\":\"nyc-taxi-mdm-platform-warehouse-export-etl\",\"JobRunState\":\"SUCCEEDED\",\"LastModifiedOn\":1786475820331,\"LogGroupName\":\"/aws-glue/jobs\",\"MaxCapacity\":2.0,\"NumberOfWorkers\":2,\"PredecessorRuns\":[],\"StartedOn\":1786475692400,\"Timeout\":2880,\"WorkerType\":\"G.1X\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:02.620000-07:00",
+      "type": "TaskStateExited",
+      "id": 25,
+      "previousEventId": 24,
+      "stateExitedEventDetails": {
+        "name": "WarehouseExport",
+        "output": "{}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:02.620000-07:00",
+      "type": "TaskStateEntered",
+      "id": 26,
+      "previousEventId": 25,
+      "stateEnteredEventDetails": {
+        "name": "StartRedshiftCopy",
+        "input": "{}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:02.620000-07:00",
+      "type": "TaskScheduled",
+      "id": 27,
+      "previousEventId": 26,
+      "taskScheduledEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "batchExecuteStatement",
+        "region": "us-east-2",
+        "parameters": "{\"WorkgroupName\":\"nyc-taxi-mdm-wg\",\"Database\":\"taxi_analytics\",\"StatementName\":\"nyc-taxi-mdm-platform-pipeline-copy\",\"Sqls\":[\"TRUNCATE TABLE dim_zone\",\"COPY dim_zone\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_zone/'\\nIAM_ROLE 'arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-redshift-role'\\nFORMAT AS PARQUET\",\"TRUNCATE TABLE dim_date\",\"COPY dim_date\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_date/'\\nIAM_ROLE 'arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-redshift-role'\\nFORMAT AS PARQUET\",\"TRUNCATE TABLE dim_payment\",\"COPY dim_payment\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_payment/'\\nIAM_ROLE 'arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-redshift-role'\\nFORMAT AS PARQUET\",\"TRUNCATE TABLE fact_trips\",\"COPY fact_trips\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/fact_trips/'\\nIAM_ROLE 'arn:aws:iam::<ACCOUNT_ID>:role/nyc-taxi-mdm-redshift-role'\\nFORMAT AS PARQUET\",\"ANALYZE dim_zone\",\"ANALYZE dim_date\",\"ANALYZE dim_payment\",\"ANALYZE fact_trips\",\"SELECT 'fact_trips'  AS table_name, COUNT(*) AS rows FROM fact_trips\\nUNION ALL SELECT 'dim_zone',    COUNT(*) FROM dim_zone\\nUNION ALL SELECT 'dim_date',    COUNT(*) FROM dim_date\\nUNION ALL SELECT 'dim_payment', COUNT(*) FROM dim_payment\\nORDER BY table_name\"]}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:02.671000-07:00",
+      "type": "TaskStarted",
+      "id": 28,
+      "previousEventId": 27,
+      "taskStartedEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "batchExecuteStatement"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:03.174000-07:00",
+      "type": "TaskSucceeded",
+      "id": 29,
+      "previousEventId": 28,
+      "taskSucceededEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "batchExecuteStatement",
+        "output": "{\"CreatedAt\":\"2026-08-11T19:17:02.814Z\",\"Database\":\"taxi_analytics\",\"DbUser\":\"IAMR:nyc-taxi-mdm-platform-sfn-role\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\",\"WorkgroupName\":\"nyc-taxi-mdm-wg\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:03.191000-07:00",
+      "type": "TaskStateExited",
+      "id": 30,
+      "previousEventId": 29,
+      "stateExitedEventDetails": {
+        "name": "StartRedshiftCopy",
+        "output": "{\"redshift\":{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:03.191000-07:00",
+      "type": "WaitStateEntered",
+      "id": 31,
+      "previousEventId": 30,
+      "stateEnteredEventDetails": {
+        "name": "WaitForRedshiftCopy",
+        "input": "{\"redshift\":{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.232000-07:00",
+      "type": "WaitStateExited",
+      "id": 32,
+      "previousEventId": 31,
+      "stateExitedEventDetails": {
+        "name": "WaitForRedshiftCopy",
+        "output": "{\"redshift\":{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.232000-07:00",
+      "type": "TaskStateEntered",
+      "id": 33,
+      "previousEventId": 32,
+      "stateEnteredEventDetails": {
+        "name": "CheckRedshiftCopy",
+        "input": "{\"redshift\":{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.232000-07:00",
+      "type": "TaskScheduled",
+      "id": 34,
+      "previousEventId": 33,
+      "taskScheduledEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement",
+        "region": "us-east-2",
+        "parameters": "{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.271000-07:00",
+      "type": "TaskStarted",
+      "id": 35,
+      "previousEventId": 34,
+      "taskStartedEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.524000-07:00",
+      "type": "TaskSucceeded",
+      "id": 36,
+      "previousEventId": 35,
+      "taskSucceededEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement",
+        "output": "{\"CreatedAt\":\"2026-08-11T19:17:02.814Z\",\"Database\":\"taxi_analytics\",\"DbUser\":\"IAMR:nyc-taxi-mdm-platform-sfn-role\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\",\"RedshiftPid\":1073815671,\"RedshiftQueryId\":0,\"ResultFormat\":\"json\",\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"STARTED\",\"SubStatements\":[{\"CreatedAt\":\"2026-08-11T19:17:02.963Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:1\",\"QueryString\":\"TRUNCATE TABLE dim_zone\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"STARTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.474Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.967Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:2\",\"QueryString\":\"COPY dim_zone\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_zone/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.970Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:3\",\"QueryString\":\"TRUNCATE TABLE dim_date\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.974Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:4\",\"QueryString\":\"COPY dim_date\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_date/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.978Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:5\",\"QueryString\":\"TRUNCATE TABLE dim_payment\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.981Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:6\",\"QueryString\":\"COPY dim_payment\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_payment/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.985Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:7\",\"QueryString\":\"TRUNCATE TABLE fact_trips\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.989Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:8\",\"QueryString\":\"COPY fact_trips\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/fact_trips/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.992Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:9\",\"QueryString\":\"ANALYZE dim_zone\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.996Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:10\",\"QueryString\":\"ANALYZE dim_date\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:11\",\"QueryString\":\"ANALYZE dim_payment\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03.003Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:12\",\"QueryString\":\"ANALYZE fact_trips\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03.007Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:13\",\"QueryString\":\"SELECT 'fact_trips'  AS table_name, COUNT(*) AS rows FROM fact_trips\\nUNION ALL SELECT 'dim_zone',    COUNT(*) FROM dim_zone\\nUNION ALL SELECT 'dim_date',    COUNT(*) FROM dim_date\\nUNION ALL SELECT 'dim_payment', COUNT(*) FROM dim_payment\\nORDER BY table_name\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"}],\"UpdatedAt\":\"2026-08-11T19:17:03.469Z\",\"WorkgroupName\":\"nyc-taxi-mdm-wg\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.538000-07:00",
+      "type": "TaskStateExited",
+      "id": 37,
+      "previousEventId": 36,
+      "stateExitedEventDetails": {
+        "name": "CheckRedshiftCopy",
+        "output": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.538000-07:00",
+      "type": "ChoiceStateEntered",
+      "id": 38,
+      "previousEventId": 37,
+      "stateEnteredEventDetails": {
+        "name": "RedshiftCopyComplete",
+        "input": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.538000-07:00",
+      "type": "ChoiceStateExited",
+      "id": 39,
+      "previousEventId": 38,
+      "stateExitedEventDetails": {
+        "name": "RedshiftCopyComplete",
+        "output": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:13.538000-07:00",
+      "type": "WaitStateEntered",
+      "id": 40,
+      "previousEventId": 39,
+      "stateEnteredEventDetails": {
+        "name": "WaitForRedshiftCopy",
+        "input": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.584000-07:00",
+      "type": "WaitStateExited",
+      "id": 41,
+      "previousEventId": 40,
+      "stateExitedEventDetails": {
+        "name": "WaitForRedshiftCopy",
+        "output": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.584000-07:00",
+      "type": "TaskStateEntered",
+      "id": 42,
+      "previousEventId": 41,
+      "stateEnteredEventDetails": {
+        "name": "CheckRedshiftCopy",
+        "input": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.584000-07:00",
+      "type": "TaskScheduled",
+      "id": 43,
+      "previousEventId": 42,
+      "taskScheduledEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement",
+        "region": "us-east-2",
+        "parameters": "{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.624000-07:00",
+      "type": "TaskStarted",
+      "id": 44,
+      "previousEventId": 43,
+      "taskStartedEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.842000-07:00",
+      "type": "TaskSucceeded",
+      "id": 45,
+      "previousEventId": 44,
+      "taskSucceededEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement",
+        "output": "{\"CreatedAt\":\"2026-08-11T19:17:02.814Z\",\"Database\":\"taxi_analytics\",\"DbUser\":\"IAMR:nyc-taxi-mdm-platform-sfn-role\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\",\"RedshiftPid\":1073815671,\"RedshiftQueryId\":0,\"ResultFormat\":\"json\",\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"STARTED\",\"SubStatements\":[{\"CreatedAt\":\"2026-08-11T19:17:02.963Z\",\"Duration\":10640439574,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:1\",\"QueryString\":\"TRUNCATE TABLE dim_zone\",\"RedshiftQueryId\":0,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:14.179Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.967Z\",\"Duration\":4091749725,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:2\",\"QueryString\":\"COPY dim_zone\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_zone/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236873,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:18.359Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.970Z\",\"Duration\":364951095,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:3\",\"QueryString\":\"TRUNCATE TABLE dim_date\",\"RedshiftQueryId\":2236873,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:18.819Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.974Z\",\"Duration\":954992632,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:4\",\"QueryString\":\"COPY dim_date\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_date/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236882,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:19.849Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.978Z\",\"Duration\":113641617,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:5\",\"QueryString\":\"TRUNCATE TABLE dim_payment\",\"RedshiftQueryId\":2236882,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:20.039Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.981Z\",\"Duration\":765734116,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:6\",\"QueryString\":\"COPY dim_payment\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_payment/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236891,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:20.879Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.985Z\",\"Duration\":144528492,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:7\",\"QueryString\":\"TRUNCATE TABLE fact_trips\",\"RedshiftQueryId\":2236891,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:21.099Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.989Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:8\",\"QueryString\":\"COPY fact_trips\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/fact_trips/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"STARTED\",\"UpdatedAt\":\"2026-08-11T19:17:21.111Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.992Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:9\",\"QueryString\":\"ANALYZE dim_zone\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.996Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:10\",\"QueryString\":\"ANALYZE dim_date\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:11\",\"QueryString\":\"ANALYZE dim_payment\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03.003Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:12\",\"QueryString\":\"ANALYZE fact_trips\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03.007Z\",\"Duration\":-1,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:13\",\"QueryString\":\"SELECT 'fact_trips'  AS table_name, COUNT(*) AS rows FROM fact_trips\\nUNION ALL SELECT 'dim_zone',    COUNT(*) FROM dim_zone\\nUNION ALL SELECT 'dim_date',    COUNT(*) FROM dim_date\\nUNION ALL SELECT 'dim_payment', COUNT(*) FROM dim_payment\\nORDER BY table_name\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"SUBMITTED\",\"UpdatedAt\":\"2026-08-11T19:17:03.012Z\"}],\"UpdatedAt\":\"2026-08-11T19:17:03.469Z\",\"WorkgroupName\":\"nyc-taxi-mdm-wg\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.857000-07:00",
+      "type": "TaskStateExited",
+      "id": 46,
+      "previousEventId": 45,
+      "stateExitedEventDetails": {
+        "name": "CheckRedshiftCopy",
+        "output": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.857000-07:00",
+      "type": "ChoiceStateEntered",
+      "id": 47,
+      "previousEventId": 46,
+      "stateEnteredEventDetails": {
+        "name": "RedshiftCopyComplete",
+        "input": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.857000-07:00",
+      "type": "ChoiceStateExited",
+      "id": 48,
+      "previousEventId": 47,
+      "stateExitedEventDetails": {
+        "name": "RedshiftCopyComplete",
+        "output": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:23.857000-07:00",
+      "type": "WaitStateEntered",
+      "id": 49,
+      "previousEventId": 48,
+      "stateEnteredEventDetails": {
+        "name": "WaitForRedshiftCopy",
+        "input": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:33.903000-07:00",
+      "type": "WaitStateExited",
+      "id": 50,
+      "previousEventId": 49,
+      "stateExitedEventDetails": {
+        "name": "WaitForRedshiftCopy",
+        "output": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:33.903000-07:00",
+      "type": "TaskStateEntered",
+      "id": 51,
+      "previousEventId": 50,
+      "stateEnteredEventDetails": {
+        "name": "CheckRedshiftCopy",
+        "input": "{\"redshift\":{\"Status\":\"STARTED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:33.903000-07:00",
+      "type": "TaskScheduled",
+      "id": 52,
+      "previousEventId": 51,
+      "taskScheduledEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement",
+        "region": "us-east-2",
+        "parameters": "{\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:33.941000-07:00",
+      "type": "TaskStarted",
+      "id": 53,
+      "previousEventId": 52,
+      "taskStartedEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.135000-07:00",
+      "type": "TaskSucceeded",
+      "id": 54,
+      "previousEventId": 53,
+      "taskSucceededEventDetails": {
+        "resourceType": "aws-sdk:redshiftdata",
+        "resource": "describeStatement",
+        "output": "{\"CreatedAt\":\"2026-08-11T19:17:02.814Z\",\"Database\":\"taxi_analytics\",\"DbUser\":\"IAMR:nyc-taxi-mdm-platform-sfn-role\",\"Duration\":19972440118,\"Error\":\"Query #9 failed with ERROR: skipping \\\"dim_zone\\\" --- only table or database owner can analyze it\",\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\",\"RedshiftPid\":1073815671,\"RedshiftQueryId\":0,\"ResultFormat\":\"json\",\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"FAILED\",\"SubStatements\":[{\"CreatedAt\":\"2026-08-11T19:17:02.963Z\",\"Duration\":10640439574,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:1\",\"QueryString\":\"TRUNCATE TABLE dim_zone\",\"RedshiftQueryId\":0,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.967Z\",\"Duration\":4091749725,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:2\",\"QueryString\":\"COPY dim_zone\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_zone/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236873,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.970Z\",\"Duration\":364951095,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:3\",\"QueryString\":\"TRUNCATE TABLE dim_date\",\"RedshiftQueryId\":2236873,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.974Z\",\"Duration\":954992632,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:4\",\"QueryString\":\"COPY dim_date\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_date/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236882,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.978Z\",\"Duration\":113641617,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:5\",\"QueryString\":\"TRUNCATE TABLE dim_payment\",\"RedshiftQueryId\":2236882,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.981Z\",\"Duration\":765734116,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:6\",\"QueryString\":\"COPY dim_payment\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/dim_payment/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236891,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.985Z\",\"Duration\":144528492,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:7\",\"QueryString\":\"TRUNCATE TABLE fact_trips\",\"RedshiftQueryId\":2236891,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.989Z\",\"Duration\":2896402867,\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:8\",\"QueryString\":\"COPY fact_trips\\nFROM 's3://emani-nyc-taxi-bucket/warehouse/fact_trips/'\\nIAM_ROLE ''\\nFORMAT AS PARQUET\",\"RedshiftQueryId\":2236900,\"ResultRows\":0,\"ResultSize\":0,\"Status\":\"FINISHED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.992Z\",\"Duration\":-1,\"Error\":\"ERROR: skipping \\\"dim_zone\\\" --- only table or database owner can analyze it\",\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:9\",\"QueryString\":\"ANALYZE dim_zone\",\"RedshiftQueryId\":2236900,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"FAILED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:02.996Z\",\"Duration\":-1,\"Error\":\"Connection or an prior query failed.\",\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:10\",\"QueryString\":\"ANALYZE dim_date\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"ABORTED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03Z\",\"Duration\":-1,\"Error\":\"Connection or an prior query failed.\",\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:11\",\"QueryString\":\"ANALYZE dim_payment\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"ABORTED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03.003Z\",\"Duration\":-1,\"Error\":\"Connection or an prior query failed.\",\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:12\",\"QueryString\":\"ANALYZE fact_trips\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"ABORTED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"},{\"CreatedAt\":\"2026-08-11T19:17:03.007Z\",\"Duration\":-1,\"Error\":\"Connection or an prior query failed.\",\"HasResultSet\":false,\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63:13\",\"QueryString\":\"SELECT 'fact_trips'  AS table_name, COUNT(*) AS rows FROM fact_trips\\nUNION ALL SELECT 'dim_zone',    COUNT(*) FROM dim_zone\\nUNION ALL SELECT 'dim_date',    COUNT(*) FROM dim_date\\nUNION ALL SELECT 'dim_payment', COUNT(*) FROM dim_payment\\nORDER BY table_name\",\"RedshiftQueryId\":0,\"ResultRows\":-1,\"ResultSize\":-1,\"Status\":\"ABORTED\",\"UpdatedAt\":\"2026-08-11T19:17:24.362Z\"}],\"UpdatedAt\":\"2026-08-11T19:17:24.481Z\",\"WorkgroupName\":\"nyc-taxi-mdm-wg\"}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "TaskStateExited",
+      "id": 55,
+      "previousEventId": 54,
+      "stateExitedEventDetails": {
+        "name": "CheckRedshiftCopy",
+        "output": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "ChoiceStateEntered",
+      "id": 56,
+      "previousEventId": 55,
+      "stateEnteredEventDetails": {
+        "name": "RedshiftCopyComplete",
+        "input": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "ChoiceStateExited",
+      "id": 57,
+      "previousEventId": 56,
+      "stateExitedEventDetails": {
+        "name": "RedshiftCopyComplete",
+        "output": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "PassStateEntered",
+      "id": 58,
+      "previousEventId": 57,
+      "stateEnteredEventDetails": {
+        "name": "RedshiftCopyFailed",
+        "input": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "PassStateExited",
+      "id": 59,
+      "previousEventId": 58,
+      "stateExitedEventDetails": {
+        "name": "RedshiftCopyFailed",
+        "output": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"},\"error\":{\"Cause\":\"Redshift COPY did not reach FINISHED.\",\"Stage\":\"StartRedshiftCopy\",\"Status\":\"FAILED\",\"StatementId\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "TaskStateEntered",
+      "id": 60,
+      "previousEventId": 59,
+      "stateEnteredEventDetails": {
+        "name": "NotifyFailure",
+        "input": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"},\"error\":{\"Cause\":\"Redshift COPY did not reach FINISHED.\",\"Stage\":\"StartRedshiftCopy\",\"Status\":\"FAILED\",\"StatementId\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.148000-07:00",
+      "type": "TaskScheduled",
+      "id": 61,
+      "previousEventId": 60,
+      "taskScheduledEventDetails": {
+        "resourceType": "sns",
+        "resource": "publish",
+        "region": "us-east-2",
+        "parameters": "{\"TopicArn\":\"arn:aws:sns:us-east-2:<ACCOUNT_ID>:nyc-taxi-mdm-platform-alerts\",\"Subject\":\"FAILED: nyc-taxi-mdm-platform-pipeline\",\"Message\":\"State machine nyc-taxi-mdm-platform-pipeline execution 6fc1eff7-7368-457a-ac12-8f3e0a8c4bb9 failed. Detail: {\\\"Cause\\\":\\\"Redshift COPY did not reach FINISHED.\\\",\\\"Stage\\\":\\\"StartRedshiftCopy\\\",\\\"Status\\\":\\\"FAILED\\\",\\\"StatementId\\\":\\\"6c30e496-4504-4af4-a940-f5f42418cc63\\\"}\"}"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.234000-07:00",
+      "type": "TaskStarted",
+      "id": 62,
+      "previousEventId": 61,
+      "taskStartedEventDetails": {
+        "resourceType": "sns",
+        "resource": "publish"
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.299000-07:00",
+      "type": "TaskSucceeded",
+      "id": 63,
+      "previousEventId": 62,
+      "taskSucceededEventDetails": {
+        "resourceType": "sns",
+        "resource": "publish",
+        "output": "{\"MessageId\":\"4bd50254-7f63-5cbf-81f0-60a108ed3975\",\"SdkHttpMetadata\":{\"AllHttpHeaders\":{\"x-amzn-RequestId\":[\"a85405d1-daff-454c-8ff0-6c3c5ac8ca52\"],\"connection\":[\"keep-alive\"],\"Content-Length\":[\"294\"],\"Date\":[\"Tue, 11 Aug 2026 19:17:34 GMT\"],\"Content-Type\":[\"text/xml\"]},\"HttpHeaders\":{\"connection\":\"keep-alive\",\"Content-Length\":\"294\",\"Content-Type\":\"text/xml\",\"Date\":\"Tue, 11 Aug 2026 19:17:34 GMT\",\"x-amzn-RequestId\":\"a85405d1-daff-454c-8ff0-6c3c5ac8ca52\"},\"HttpStatusCode\":200},\"SdkResponseMetadata\":{\"RequestId\":\"a85405d1-daff-454c-8ff0-6c3c5ac8ca52\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.311000-07:00",
+      "type": "TaskStateExited",
+      "id": 64,
+      "previousEventId": 63,
+      "stateExitedEventDetails": {
+        "name": "NotifyFailure",
+        "output": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"},\"error\":{\"Cause\":\"Redshift COPY did not reach FINISHED.\",\"Stage\":\"StartRedshiftCopy\",\"Status\":\"FAILED\",\"StatementId\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "outputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.311000-07:00",
+      "type": "FailStateEntered",
+      "id": 65,
+      "previousEventId": 64,
+      "stateEnteredEventDetails": {
+        "name": "PipelineFailed",
+        "input": "{\"redshift\":{\"Status\":\"FAILED\",\"Id\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"},\"error\":{\"Cause\":\"Redshift COPY did not reach FINISHED.\",\"Stage\":\"StartRedshiftCopy\",\"Status\":\"FAILED\",\"StatementId\":\"6c30e496-4504-4af4-a940-f5f42418cc63\"}}",
+        "inputDetails": {
+          "truncated": false
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-11 12:17:34.342000-07:00",
+      "type": "ExecutionFailed",
+      "id": 66,
+      "previousEventId": 65,
+      "executionFailedEventDetails": {
+        "error": "PipelineFailed",
+        "cause": "A pipeline stage failed. See the SNS notification and the execution history for the failing stage."
+      }
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+  "nyc-taxi-mdm-platform-pipeline": {
+    "widgets": [
+      {
+        "height": 2,
+        "properties": {
+          "markdown": "# nyc-taxi-mdm-platform - pipeline\nSilver -> Gold -> Golden Zone -> Warehouse Export -> Redshift COPY -> QuickSight SPICE refresh, orchestrated by **nyc-taxi-mdm-platform-pipeline**. The pipeline runs on demand, so gaps in these charts are expected."
+        },
+        "type": "text",
+        "width": 24,
+        "x": 0,
+        "y": 0
+      },
+      {
+        "height": 6,
+        "properties": {
+          "metrics": [
+            [
+              "AWS/States",
+              "ExecutionsStarted",
+              "StateMachineArn",
+              "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline"
+            ],
+            [
+              ".",
+              "ExecutionsSucceeded",
+              ".",
+              "."
+            ],
+            [
+              ".",
+              "ExecutionsFailed",
+              ".",
+              "."
+            ],
+            [
+              ".",
+              "ExecutionsTimedOut",
+              ".",
+              "."
+            ],
+            [
+              ".",
+              "ExecutionsAborted",
+              ".",
+              "."
+            ]
+          ],
+          "period": 300,
+          "region": "us-east-2",
+          "stat": "Sum",
+          "title": "Step Functions executions",
+          "view": "timeSeries"
+        },
+        "type": "metric",
+        "width": 12,
+        "x": 0,
+        "y": 2
+      },
+      {
+        "height": 6,
+        "properties": {
+          "annotations": {
+            "horizontal": [
+              {
+                "label": "duration alarm",
+                "value": 2700000
+              }
+            ]
+          },
+          "metrics": [
+            [
+              "AWS/States",
+              "ExecutionTime",
+              "StateMachineArn",
+              "arn:aws:states:us-east-2:<ACCOUNT_ID>:stateMachine:nyc-taxi-mdm-platform-pipeline"
+            ]
+          ],
+          "period": 300,
+          "region": "us-east-2",
+          "stat": "Maximum",
+          "title": "Pipeline execution duration (ms)",
+          "view": "timeSeries"
+        },
+        "type": "metric",
+        "width": 12,
+        "x": 12,
+        "y": 2
+      },
+      {
+        "height": 6,
+        "properties": {
+          "metrics": [
+            [
+              {
+                "expression": "SEARCH('{Glue,JobName,JobRunId,Type} MetricName=\"glue.driver.aggregate.elapsedTime\" JobName=\"nyc-taxi-mdm-platform-yellow-taxi-silver-etl\"', 'Maximum', 300)",
+                "id": "e0",
+                "label": "nyc-taxi-mdm-platform-yellow-taxi-silver-etl"
+              }
+            ],
+            [
+              {
+                "expression": "SEARCH('{Glue,JobName,JobRunId,Type} MetricName=\"glue.driver.aggregate.elapsedTime\" JobName=\"nyc-taxi-mdm-platform-yellow-taxi-gold-etl\"', 'Maximum', 300)",
+                "id": "e1",
+                "label": "nyc-taxi-mdm-platform-yellow-taxi-gold-etl"
+              }
+            ],
+            [
+              {
+                "expression": "SEARCH('{Glue,JobName,JobRunId,Type} MetricName=\"glue.driver.aggregate.elapsedTime\" JobName=\"nyc-taxi-mdm-platform-golden-zone-etl\"', 'Maximum', 300)",
+                "id": "e2",
+                "label": "nyc-taxi-mdm-platform-golden-zone-etl"
+              }
+            ],
+            [
+              {
+                "expression": "SEARCH('{Glue,JobName,JobRunId,Type} MetricName=\"glue.driver.aggregate.elapsedTime\" JobName=\"nyc-taxi-mdm-platform-warehouse-export-etl\"', 'Maximum', 300)",
+                "id": "e3",
+                "label": "nyc-taxi-mdm-platform-warehouse-export-etl"
+              }
+            ]
+          ],
+          "period": 300,
+          "region": "us-east-2",
+          "title": "Glue job elapsed time per run (ms)",
+          "view": "timeSeries"
+        },
+        "type": "metric",
+        "width": 12,
+        "x": 0,
+        "y": 8
+      },
+      {
+        "height": 6,
+        "properties": {
+          "annotations": {
+            "horizontal": [
+              {
+                "label": "task failure watch level",
+                "value": 5
+              }
+            ]
+          },
+          "metrics": [
+            [
+              {
+                "expression": "SUM(SEARCH('{Glue,JobName,JobRunId,Type} MetricName=\"glue.driver.aggregate.numFailedTasks\" (JobName=\"nyc-taxi-mdm-platform-yellow-taxi-silver-etl\" OR JobName=\"nyc-taxi-mdm-platform-yellow-taxi-gold-etl\" OR JobName=\"nyc-taxi-mdm-platform-golden-zone-etl\" OR JobName=\"nyc-taxi-mdm-platform-warehouse-export-etl\")', 'Sum', 300))",
+                "id": "failed_tasks",
+                "label": "Failed tasks (all pipeline jobs)"
+              }
+            ]
+          ],
+          "period": 300,
+          "region": "us-east-2",
+          "title": "Glue failed Spark tasks",
+          "view": "timeSeries"
+        },
+        "type": "metric",
+        "width": 12,
+        "x": 12,
+        "y": 8
+      },
+      {
+        "height": 6,
+        "properties": {
+          "metrics": [
+            [
+              "AWS/Redshift-Serverless",
+              "ComputeCapacity",
+              "Workgroup",
+              "nyc-taxi-mdm-wg",
+              {
+                "label": "RPU capacity",
+                "stat": "Average"
+              }
+            ],
+            [
+              "AWS/Redshift-Serverless",
+              "ComputeSeconds",
+              "Workgroup",
+              "nyc-taxi-mdm-wg",
+              {
+                "label": "RPU-seconds",
+                "stat": "Sum"
+              }
+            ]
+          ],
+          "period": 300,
+          "region": "us-east-2",
+          "title": "Redshift Serverless capacity and usage",
+          "view": "timeSeries"
+        },
+        "type": "metric",
+        "width": 12,
+        "x": 0,
+        "y": 14
+      },
+      {
+        "height": 6,
+        "properties": {
+          "metrics": [
+            [
+              "AWS/Redshift-Serverless",
+              "QueriesCompletedPerSecond",
+              "Workgroup",
+              "nyc-taxi-mdm-wg",
+              {
+                "stat": "Average"
+              }
+            ],
+            [
+              "AWS/Redshift-Serverless",
+              "QueryDuration",
+              "Workgroup",
+              "nyc-taxi-mdm-wg",
+              {
+                "stat": "Average"
+              }
+            ],
+            [
+              "AWS/Redshift-Serverless",
+              "QueriesRunning",
+              "Workgroup",
+              "nyc-taxi-mdm-wg",
+              {
+                "stat": "Maximum"
+              }
+            ]
+          ],
+          "period": 300,
+          "region": "us-east-2",
+          "title": "Redshift query activity",
+          "view": "timeSeries"
+        },
+        "type": "metric",
+        "width": 12,
+        "x": 12,
+        "y": 14
+      }
+    ]
+  }
+}

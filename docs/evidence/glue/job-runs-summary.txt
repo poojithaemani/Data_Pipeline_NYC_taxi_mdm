@@ -1,0 +1,8 @@
+Glue job run history
+==========================================================================================
+nyc-taxi-mdm-platform-yellow-taxi-silver-etl           9 runs    8 ok  avg   158s  max   183s
+nyc-taxi-mdm-platform-yellow-taxi-gold-etl             8 runs    8 ok  avg   173s  max   196s
+nyc-taxi-mdm-platform-golden-zone-etl                 10 runs   10 ok  avg   116s  max   154s
+nyc-taxi-mdm-platform-warehouse-export-etl             6 runs    5 ok  avg   132s  max   141s
+nyc-taxi-mdm-platform-sync-pipeline-runs               3 runs    3 ok  avg    21s  max    23s
+nyc-taxi-mdm-platform-delta-demo                       3 runs    1 ok  avg   152s  max   152s
