@@ -17,7 +17,8 @@ All six steps ran in dependency-safe order.
 | 3 | `terraform apply` | 78 destroyed, 2 policies updated. `terraform plan` now reports **No changes** |
 | 4 | Purge NYC S3 data | 1,815 deleted (1,716 versions + 99 delete markers), 0 errors. Bucket + encryption retained |
 | 5 | Delete orphaned Glue log groups | 6 deleted (~17.5 MB). 0 log groups remain |
-| 6 | Verification | See §13 |
+| 6 | Verification | See §12 |
+| 7 | Final pass — pre-Terraform artifacts | 8 more resources deleted. See §13 |
 
 **Two deviations from the approved plan**, both required to complete approved work:
 
@@ -132,18 +133,15 @@ Harmless. That file is gitignored and yours — delete the line when convenient.
 | KMS CMK + alias | 2 | **Critical.** Destroying it makes every retained S3 object permanently unreadable |
 | Redshift Serverless namespace, workgroup, security group, IAM role + policy | 6 | Retained per instruction. The security group is also what the QuickSight VPC connection points at |
 | Redshift admin secret + version | 2 | Confirmed retained dependency: the Redshift `COPY` path authenticates through it |
-| GitHub OIDC provider, plan/apply roles, policies, attachments | 7 | Reusable CI/CD federation, no long-lived credentials. See §12 |
+| GitHub OIDC provider, plan/apply roles, policies, attachments | 7 | Reusable CI/CD federation, no long-lived credentials. See §11 |
 | `random_password.rds_master` | 1 | State-only, no AWS resource, no cost |
-
-Not Terraform-managed, also retained: the **QuickSight account, subscription and
-VPC connection**, and the account's default VPC and subnets.
 
 Not Terraform-managed, also retained: the **QuickSight account, subscription and
 VPC connection**, and the account's default VPC and subnets.
 
 ---
 
-## 5. DELETE — 64 resources in the plan
+## 5. DELETE — 78 resources in the plan
 
 | Group | Count | Notes |
 |---|---:|---|
@@ -158,6 +156,9 @@ VPC connection**, and the account's default VPC and subnets.
 | S3 script objects | 8 | ETL scripts and the temp-dir marker |
 | Glue IAM role + policy | 2 | |
 | Athena workgroup | 1 | |
+| RDS master secret + version (D3) | 2 | Orphaned once the database goes |
+| CloudWatch log groups (D4) | 3 | All empty; two belong to modules never deployed |
+| S3 folder markers (D5) | 9 | Prefix markers only — bucket and its config retained |
 
 ---
 
@@ -178,7 +179,7 @@ removed, so the only consequence is a confusing error if done in reverse.
 
 ---
 
-## 7. Decisions needed
+## 7. Decisions taken
 
 | # | Item | Recurring cost | Recommendation |
 |---|---|---|---|
@@ -193,7 +194,7 @@ removed, so the only consequence is a confusing error if done in reverse.
 
 ---
 
-## 8. Recurring cost table
+## 8. Recurring cost table (pre-teardown estimate)
 
 List prices, us-east-2. Month-to-date observed spend is effectively **$0** across
 all services, consistent with free-tier or trial coverage — so these are ceilings,
@@ -211,8 +212,8 @@ not current charges.
 | S3 NYC data + versions | **Delete** | Yes | — | 700 MB + ~1,000 versions + ~839 markers |
 | S3 Terraform state bucket | **Keep** | No | negligible | The backend |
 | KMS CMK | **Keep** | No | $1/mo | **Encrypts retained S3 data** |
-| Secrets Manager (2) | **Keep** (1 by decision) | Mixed | $0.40 each/mo | Redshift admin required; RDS one orphaned (D3) |
-| CloudWatch log groups | **Keep** (D4) | Yes | ~$0 | Empty |
+| Secrets Manager (2) | **Keep 1 / Delete 1** | Mixed | $0.40 each/mo | Redshift admin required; RDS one deleted with the database (D3) |
+| CloudWatch log groups | **Delete** | Yes | ~$0 | Empty; two from modules never deployed (D4) |
 | Glue jobs/crawlers/catalog | **Delete** | Yes | $0 idle | Pay-per-run; no charge when idle, but obsolete |
 | Step Functions | **Delete** | Yes | $0 idle | Pay-per-transition |
 | Athena workgroup | **Delete** | Yes | $0 idle | Pay-per-query |
@@ -222,7 +223,7 @@ not current charges.
 
 ---
 
-## 9. Validation performed
+## 9. Pre-apply validation
 
 - `terraform fmt -recursive` — clean
 - `terraform validate` — Success (one benign tfvars warning, §3)
@@ -252,7 +253,7 @@ Post-apply verification is **not yet done** — it runs after approval.
 
 ---
 
-## 12. D8 — narrowing the CI apply role
+## 11. D8 — narrowing the CI apply role
 
 Reviewed, **not changed**. No permission was expanded.
 
@@ -279,7 +280,7 @@ correct default for a shared account, but it is a real friction cost.
 
 ---
 
-## 13. Post-teardown verification (2026-08-20)
+## 12. Post-teardown verification (2026-08-20)
 
 **NYC resources destroyed — all zero in us-east-2:**
 
@@ -318,27 +319,102 @@ retained Redshift Serverless managed endpoint; 3 ENIs belong to the retained
 QuickSight VPC connection. Remaining security groups are the retained Redshift
 SG and the VPC default.
 
-### Outstanding recurring cost
+---
+
+## 13. Final pass — pre-Terraform artifacts (2026-08-20)
+
+A second, wider scan after the six steps found four categories of NYC resource
+the teardown could not have caught: all were created **by hand before the
+Terraform platform existed**, so they were never in state, and Terraform only
+destroys what it manages.
+
+| Found | Origin | Disposition |
+|---|---|---|
+| `TaxiMDMLambda` (python3.12) + `TaxiMDMLambdaRole` | 2026-07-20, manual. The Lambda module was never wired into the root config | **Deleted** |
+| `taxi-db-snapshot` — 20 GB manual RDS snapshot | 2026-07-26, of instance `taxi-db` — an *earlier* hand-built database, not the Terraform one | **Deleted** |
+| 5 `sqlworkbench!*` secrets | 2026-08-10, Redshift Query Editor v2 saved connections | **Deleted** (~$2.00/mo) |
+| 47 Redshift recovery points | Automatic, rolling | **Left to expire naturally** |
+
+### Dependency verification performed before deletion
+
+Every retained resource was checked for references to the four names. All clean:
+
+- Terraform state — both `state list` and a deep scan of `terraform show -json`: **0 occurrences**
+- Terraform configuration — all `.tf` files: 0 references
+- KMS key policy: clean
+- S3 bucket policies: none exist on either bucket
+- Retained IAM role policies (`gha-apply`, `gha-plan`, `redshift-role`, `quicksight-vpc-role`): all clean
+- QuickSight: 0 datasets / 0 data sources; the VPC connection uses
+  `nyc-taxi-mdm-quicksight-vpc-role`, a different and retained role
+- Redshift workload config: references only `nyc-taxi-mdm-redshift-role`
+- Lambda: 0 event-source mappings and **no resource policy**, so nothing could invoke it
+- `TaxiMDMLambdaRole`: used by that one function only, 0 instance profiles
+- `taxi-db-snapshot`: source instance no longer exists — the snapshot was standalone
+
+### Post-deletion scan
+
+`terraform plan` → **No changes**. State holds 28 real resources.
+
+us-east-2 zero across: glue jobs/crawlers/databases/connections, state machines,
+lambda, RDS instances, RDS snapshots, NAT gateways, Elastic IPs, EBS volumes,
+EC2, SNS, alarms, log groups, EventBridge, DynamoDB, ECR, EMR.
+
+Seven other regions (us-east-1, us-west-1, us-west-2, eu-west-1, eu-central-1,
+ap-south-1, ap-southeast-1): zero RDS, Redshift, Glue, EC2 and Lambda in each.
+
+---
+
+## 14. Final recurring cost
 
 | Item | Cost | Note |
 |---|---|---|
 | KMS CMK | ~$1.00/mo | Required — encrypts the retained bucket |
 | `redshift/admin` secret | ~$0.40/mo | Required by the retained workgroup |
-| **5 `sqlworkbench!*` secrets** | **~$2.00/mo** | **Not previously identified.** Redshift Query Editor v2 saved connections, created 2026-08-10 during NYC work. Several point at the now-deleted RDS. Deleting them only means re-entering connection details |
-| S3 | ~$0 | Data lake now empty; state bucket ~98 KB |
+| S3 | ~$0 | Data lake empty; state bucket ~98 KB |
 | Redshift Serverless | $0 idle | Compute billed only while queries run |
-| QuickSight | Author seat, monthly after trial | Verify trial end date in console |
+| GitHub OIDC / IAM | $0 | No long-lived credentials issued |
+| QuickSight | Author seat, monthly after trial | **Verify the trial end date in the console** — the most likely surprise charge |
 
-Month-to-date observed spend is effectively **$0** across all services.
+**~$1.40/month in fixed charges**, down from roughly $50 before teardown.
+Month-to-date observed spend is effectively **$0**, consistent with free-tier and
+trial coverage.
 
 ---
 
-## 11. Approval gate
+## 15. Approval record
 
-Before any destructive operation I need explicit approval on:
+Every destructive step was approved before execution:
 
-1. The plan as summarised in §1 (covers D1 and D2)
+1. The plan in §1 — D1 (NAT gateway) and D2 (RDS)
 2. Decisions D3–D8 in §7
 3. The four non-Terraform cleanups in §6
+4. The pre-Terraform artifacts in §13, approved after dependency verification
 
-`terraform apply` will not be run until then.
+Redshift recovery points were explicitly excluded and left to expire naturally.
+The QuickSight account, Redshift namespace/workgroup, S3 buckets, KMS CMK, the
+Redshift admin secret, GitHub OIDC and the Terraform state bucket were all
+retained by instruction and verified intact afterwards.
+
+---
+
+## 16. Rebuilding this project later
+
+The complete pre-teardown platform is tagged:
+
+```
+git checkout v1.0-nyc-complete -- terraform/
+```
+
+Restore `terraform/` **atomically** from that tag — the NYC root files reference
+25 variables that the cleanup removed, so restoring individual files will fail.
+See §2 of the rebuildability review for the full component matrix.
+
+Not recoverable from the repository, by design:
+
+- **`terraform.tfvars`** — gitignored, holds 10 required values including
+  `redshift_admin_password`. Keep a copy outside git.
+- **QuickSight assets** — never had Terraform coverage. Rebuild from the
+  captured definitions in `docs/evidence/quicksight/`.
+- **Source data** — bronze is re-fetchable from the public NYC TLC URLs in
+  `configs/source.yaml`; silver, gold and warehouse regenerate from it.
+- **MDM reference data** — restore from `services/database/seed/`.
