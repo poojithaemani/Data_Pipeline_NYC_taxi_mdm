@@ -1,11 +1,35 @@
 # NYC Taxi MDM — final cleanup and reusable-resource retention
 
-**Project status: complete.** This document is the teardown record.
-
-**Nothing has been destroyed. `terraform apply` has not been run.**
-A saved plan exists at `terraform/tfplan.decom` awaiting approval.
+**Project status: complete. Teardown EXECUTED 2026-08-20.**
 
 Identifiers are redacted throughout; live values are in the gitignored operator notes.
+
+---
+
+## 0. Execution record
+
+All six steps ran in dependency-safe order.
+
+| Step | Action | Result |
+|---|---|---|
+| 1 | Delete NYC QuickSight assets | 4 deleted. Account, subscription, VPC connection, author seat retained |
+| 2 | Drop NYC Redshift tables | 4 dropped, 0 public tables remain. Namespace + workgroup `AVAILABLE` |
+| 3 | `terraform apply` | 78 destroyed, 2 policies updated. `terraform plan` now reports **No changes** |
+| 4 | Purge NYC S3 data | 1,815 deleted (1,716 versions + 99 delete markers), 0 errors. Bucket + encryption retained |
+| 5 | Delete orphaned Glue log groups | 6 deleted (~17.5 MB). 0 log groups remain |
+| 6 | Verification | See §13 |
+
+**Two deviations from the approved plan**, both required to complete approved work:
+
+1. **The first `terraform apply` crashed** — the AWS provider plugin failed to
+   launch (Go runtime crash at startup, before any API call). Nothing was
+   destroyed. The retry succeeded.
+2. **Two resources blocked the retry and were cleared outside Terraform:**
+   - RDS `deletion_protection` was `true`; disabled via `modify-db-instance`.
+   - The Athena workgroup refused deletion as "not empty" despite 0 named
+     queries — the blocker was query *execution history*. Deleted with
+     `--recursive-delete-option`, since `athena.tf` no longer existed to carry
+     a `force_destroy` flag.
 
 ---
 
@@ -252,6 +276,60 @@ those permissions first would break the very apply that removes them.
 The trade-off to weigh afterwards: a narrowed policy blocks any new service a
 future project introduces until the policy is extended. That is arguably the
 correct default for a shared account, but it is a real friction cost.
+
+---
+
+## 13. Post-teardown verification (2026-08-20)
+
+**NYC resources destroyed — all zero in us-east-2:**
+
+```
+glue jobs 0 · crawlers 0 · databases 0 · connections 0 · state machines 0
+RDS instances 0 · NAT gateways 0 · Elastic IPs 0 · SNS topics 0
+CloudWatch alarms 0 · dashboards 0 · log groups 0 · EventBridge rules 0
+Athena workgroups: only AWS's default "primary"
+```
+
+**Retained and healthy:**
+
+| Resource | Verified |
+|---|---|
+| Redshift workgroup / namespace | `AVAILABLE`, 8 RPU, not publicly accessible |
+| QuickSight | `ENTERPRISE` / `ACCOUNT_CREATED`, VPC connection `AVAILABLE` |
+| KMS CMK | `Enabled`, not pending deletion |
+| S3 data lake | Bucket retained, versioning `Enabled`, `aws:kms` with CMK |
+| Terraform state bucket | 1 object, untouched |
+| GitHub OIDC | Provider + `gha-plan` / `gha-apply` roles present |
+| Redshift admin secret | Present, not scheduled for deletion |
+
+**Functional test — encryption still works end to end:** wrote an object to the
+retained bucket, confirmed `ServerSideEncryption: aws:kms` with the CMK, read it
+back byte-identical, then removed the object and its version. Bucket returned to
+0 versions / 0 delete markers.
+
+**Terraform state matches AWS:** `terraform plan` → *No changes. Your
+infrastructure matches the configuration.* State holds 28 real resources.
+
+**Region sweep** — us-east-1, us-west-2, eu-west-1, ap-south-1: zero RDS,
+Redshift, Glue or EC2 in any.
+
+**Not orphans, verified by ownership:** 1 VPC endpoint + 3 ENIs belong to the
+retained Redshift Serverless managed endpoint; 3 ENIs belong to the retained
+QuickSight VPC connection. Remaining security groups are the retained Redshift
+SG and the VPC default.
+
+### Outstanding recurring cost
+
+| Item | Cost | Note |
+|---|---|---|
+| KMS CMK | ~$1.00/mo | Required — encrypts the retained bucket |
+| `redshift/admin` secret | ~$0.40/mo | Required by the retained workgroup |
+| **5 `sqlworkbench!*` secrets** | **~$2.00/mo** | **Not previously identified.** Redshift Query Editor v2 saved connections, created 2026-08-10 during NYC work. Several point at the now-deleted RDS. Deleting them only means re-entering connection details |
+| S3 | ~$0 | Data lake now empty; state bucket ~98 KB |
+| Redshift Serverless | $0 idle | Compute billed only while queries run |
+| QuickSight | Author seat, monthly after trial | Verify trial end date in console |
+
+Month-to-date observed spend is effectively **$0** across all services.
 
 ---
 
