@@ -14,11 +14,6 @@ variable "environment" {
   type = string
 }
 
-variable "log_retention_days" {
-  type    = number
-  default = 30
-}
-
 variable "vpc_id" {
   type = string
 }
@@ -133,60 +128,6 @@ variable "redshift_publicly_accessible" {
   default     = false
 }
 
-# Glue catalog database names
-variable "bronze_db_name" {
-  type    = string
-  default = "bronze_db"
-}
-
-variable "silver_db_name" {
-  type    = string
-  default = "silver_db"
-}
-
-variable "gold_db_name" {
-  type    = string
-  default = "gold_db"
-}
-
-variable "master_db_name" {
-  type    = string
-  default = "master_db"
-}
-
-# Glue crawlers
-variable "bronze_crawler_name" {
-  type    = string
-  default = "bronze_crawler"
-}
-
-variable "silver_crawler_name" {
-  type    = string
-  default = "silver_crawler"
-}
-
-variable "gold_crawler_name" {
-  type    = string
-  default = "gold_crawler"
-}
-
-# Glue service role (optional). If empty, module will derive name from project_name at resource creation time.
-variable "glue_role_name" {
-  type    = string
-  default = ""
-}
-
-# Athena configuration (workgroup name). If empty, a name will be derived from project_name
-variable "athena_workgroup_name" {
-  type    = string
-  default = ""
-}
-
-variable "athena_results_prefix" {
-  type    = string
-  default = "athena-results/"
-}
-
 # S3 prefixes to grant crawler access to (can be extended)
 variable "s3_data_prefixes" {
   type    = list(string)
@@ -212,100 +153,6 @@ variable "glue_job_number_of_workers" {
     condition     = var.glue_job_number_of_workers >= 1
     error_message = "Number of workers must be at least 1."
   }
-}
-
-# S3 Data Paths for Glue Job Arguments
-variable "bronze_transactions_path" {
-  description = "S3 path to the Bronze layer transactions (e.g., 'bronze/transactions/yellow_taxi/')."
-  type        = string
-  default     = "bronze/transactions/yellow_taxi/"
-}
-
-variable "bronze_reference_path" {
-  description = "S3 path to the Bronze layer reference data (e.g., 'bronze/reference/')."
-  type        = string
-  default     = "bronze/reference/"
-}
-
-# Paths for Delta Lake tables, used by delta_target crawlers and Glue jobs
-variable "silver_delta_table_path" {
-  description = "S3 path suffix for the Silver layer Delta table (e.g., 'silver/yellow_taxi')."
-  type        = string
-  default     = "silver/yellow_taxi"
-}
-
-variable "gold_delta_table_path" {
-  description = "S3 path suffix for the Gold layer Delta table (e.g., 'gold/yellow_taxi')."
-  type        = string
-  default     = "gold/yellow_taxi"
-}
-
-variable "warehouse_path" {
-  description = "S3 path suffix for the Redshift-ready Parquet warehouse snapshot (e.g., 'warehouse')."
-  type        = string
-  default     = "warehouse"
-}
-
-# ----------------------------------------------------------------------------
-# Orchestration and observability
-#
-# All additive. create_orchestration follows the create_rds / create_redshift
-# pattern already used above, so the layer can be stood down without touching
-# any other resource.
-# ----------------------------------------------------------------------------
-
-variable "create_orchestration" {
-  description = "Create the Step Functions state machine and the CloudWatch/SNS monitoring layer."
-  type        = bool
-  default     = true
-}
-
-variable "quicksight_dataset_id" {
-  description = "Existing QuickSight SPICE dataset refreshed at the end of the pipeline. Refreshed only - never created or modified by Terraform."
-  type        = string
-  default     = "nyc-taxi-trips-star"
-}
-
-variable "alert_email" {
-  description = "Optional email subscribed to the alerts topic. Requires out-of-band confirmation of the emailed link."
-  type        = string
-  default     = ""
-}
-
-variable "redshift_poll_seconds" {
-  description = "Interval between Redshift Data API status polls in the state machine."
-  type        = number
-  default     = 10
-}
-
-variable "spice_poll_seconds" {
-  description = "Interval between QuickSight ingestion status polls in the state machine."
-  type        = number
-  default     = 20
-}
-
-variable "pipeline_timeout_seconds" {
-  description = "Overall timeout for one state machine execution."
-  type        = number
-  default     = 5400
-}
-
-variable "pipeline_duration_alarm_ms" {
-  description = "Alarm threshold for a single pipeline execution's duration, in milliseconds."
-  type        = number
-  default     = 2700000
-}
-
-variable "glue_failed_tasks_threshold" {
-  description = "Reference line on the Glue task-failure dashboard chart. Not an alarm threshold - see terraform/modules/monitoring/main.tf for why CloudWatch cannot alarm on this metric."
-  type        = number
-  default     = 5
-}
-
-variable "redshift_compute_seconds_threshold" {
-  description = "Daily RPU-second ceiling for the Redshift Serverless workgroup, used as a cost guard."
-  type        = number
-  default     = 43200
 }
 
 # ----------------------------------------------------------------------------
@@ -334,12 +181,6 @@ variable "rds_deletion_protection" {
   description = "Protect the MDM database from an accidental destroy."
   type        = bool
   default     = true
-}
-
-variable "demo_path" {
-  description = "S3 prefix holding the isolated Delta time-travel demonstration. Kept separate from the medallion layers so the demo can never be confused with production data."
-  type        = string
-  default     = "demo"
 }
 
 # ----------------------------------------------------------------------------
@@ -374,4 +215,33 @@ variable "cicd_apply_environment" {
   description = "GitHub environment gating the apply role. Configure its required reviewers in repository settings."
   type        = string
   default     = "production"
+}
+
+################################################################################
+# Retention flags
+#
+# Split out of create_orchestration during the NYC decommissioning. The
+# encryption key and the secrets outlive the pipeline that introduced them:
+# the data lake bucket's default encryption IS the CMK, so destroying the key
+# alongside the orchestration layer would make every retained object in that
+# bucket permanently unreadable. The Redshift admin secret is likewise still
+# required by the retained Redshift workgroup.
+################################################################################
+
+variable "create_kms" {
+  description = "Create the customer managed key. Retained independently of the orchestration layer because the retained S3 data lake is encrypted with it."
+  type        = bool
+  default     = true
+}
+
+variable "create_secrets" {
+  description = "Create the Secrets Manager secrets. Retained independently of the orchestration layer because the retained Redshift workgroup authenticates through the admin secret."
+  type        = bool
+  default     = true
+}
+
+variable "create_network" {
+  description = "Create the private egress path for VPC-bound Glue jobs: private subnet, NAT gateway, Elastic IP, S3 endpoint and the Glue connection. Renamed from create_orchestration during the NYC decommissioning, when the orchestration layer it also gated was removed. The NAT gateway bills hourly whenever this is true."
+  type        = bool
+  default     = true
 }

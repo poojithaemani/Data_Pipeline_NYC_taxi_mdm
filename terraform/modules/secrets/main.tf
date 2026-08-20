@@ -8,32 +8,28 @@
 #
 # Why the Redshift secret exists
 # ------------------------------
-# The Step Functions COPY stage previously authenticated with its own IAM
-# identity, which Redshift Serverless maps to the database user
-# IAMR:nyc-taxi-mdm-platform-sfn-role. That user can be granted DML, but
-# ANALYZE requires table or database ownership and is not grantable, so the
-# load failed at ANALYZE. Authenticating as the namespace admin through a
-# secret resolves that without transferring ownership of the warehouse tables
-# and without making the orchestration role a superuser.
+# A caller authenticating to Redshift with its own IAM identity is mapped to a
+# database user that can be granted DML, but ANALYZE requires table or database
+# ownership and is not grantable - so a load fails at ANALYZE. Authenticating
+# as the namespace admin through this secret resolves that without transferring
+# ownership of the warehouse tables and without making any orchestration role a
+# superuser.
 #
-# Why the RDS secret exists
-# -------------------------
-# The Glue jobs previously received the database password as a --DB_PASSWORD
-# job argument, which is readable by any principal holding glue:GetJob and is
-# stored in the job definition indefinitely. They now receive only a secret
-# ARN and fetch the credential at runtime.
+# The RDS master secret was removed during the NYC decommissioning, along with
+# the database it belonged to and the Glue jobs that fetched it at runtime. Its
+# definition is recoverable from git history if RDS is ever rebuilt.
 #
 # Secret content
 # --------------
-# Only the two keys the consumers require: username and password. Nothing
-# else is stored, so a disclosure exposes no additional topology.
+# Only the two keys the consumer requires: username and password. Nothing else
+# is stored, so a disclosure exposes no additional topology.
 #
 # Handling of the values
 # ----------------------
-# Both passwords are generated or supplied as sensitive values, are never
-# emitted in an output, and appear in no source file. They ARE written to
-# terraform.tfstate - the state file is local and gitignored and must
-# continue to be treated as a secret-bearing artifact.
+# The password is supplied as a sensitive value, is never emitted in an output,
+# and appears in no source file. It IS written to terraform.tfstate - the state
+# lives in a private, versioned S3 bucket and must continue to be treated as a
+# secret-bearing artifact.
 ############################################
 
 ############################################
@@ -61,33 +57,5 @@ resource "aws_secretsmanager_secret_version" "redshift_admin" {
   secret_string = jsonencode({
     username = var.redshift_admin_username
     password = var.redshift_admin_password
-  })
-}
-
-############################################
-# RDS master
-############################################
-
-resource "aws_secretsmanager_secret" "rds_master" {
-  name        = "${var.project_name}/rds/master"
-  description = "PostgreSQL master credentials fetched at runtime by the database-facing Glue jobs"
-
-  kms_key_id              = var.kms_key_id
-  recovery_window_in_days = var.recovery_window_in_days
-
-  tags = {
-    Name        = "${var.project_name}-rds-master"
-    Project     = var.project_name
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-  }
-}
-
-resource "aws_secretsmanager_secret_version" "rds_master" {
-  secret_id = aws_secretsmanager_secret.rds_master.id
-
-  secret_string = jsonencode({
-    username = var.rds_master_username
-    password = var.rds_master_password
   })
 }

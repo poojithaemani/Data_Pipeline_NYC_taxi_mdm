@@ -59,28 +59,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
   }
 }
 
-locals {
-  folders = [
-    "bronze/",
-    "silver/",
-    "gold/",
-    "quality/",
-    "logs/",
-    "metadata/",
-    "checkpoints/",
-    # Required deliverable: the published master-data zone. Holds the mastered
-    # reference records that the MDM pipeline produces, kept separate from the
-    # transactional medallion layers.
-    "master/",
-    # Isolated Delta time-travel / schema-evolution demonstration.
-    "demo/"
-  ]
-}
-
-resource "aws_s3_object" "folders" {
-  for_each = toset(local.folders)
-
-  bucket  = aws_s3_bucket.data_lake.id
-  key     = each.value
-  content = ""
-}

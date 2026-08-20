@@ -11,13 +11,3 @@ output "redshift_admin_secret_name" {
   description = "Name of the Redshift admin secret"
   value       = aws_secretsmanager_secret.redshift_admin.name
 }
-
-output "rds_master_secret_arn" {
-  description = "ARN of the RDS master secret fetched at runtime by the Glue jobs"
-  value       = aws_secretsmanager_secret.rds_master.arn
-}
-
-output "rds_master_secret_name" {
-  description = "Name of the RDS master secret"
-  value       = aws_secretsmanager_secret.rds_master.name
-}

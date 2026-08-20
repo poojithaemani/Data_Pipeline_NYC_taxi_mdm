@@ -1,19 +1,3 @@
-locals {
-  # Shared by the stepfunctions and monitoring modules. The monitoring module
-  # builds alarms against the state machine while the state machine publishes
-  # to the monitoring module's SNS topic, so the name is passed to both as a
-  # plain string rather than as a module output - otherwise the two modules
-  # would form a dependency cycle.
-  state_machine_name = "${var.project_name}-pipeline"
-
-  pipeline_glue_job_names = [
-    aws_glue_job.silver_etl.name,
-    aws_glue_job.gold_etl.name,
-    aws_glue_job.golden_zone_etl.name,
-    aws_glue_job.warehouse_export_etl.name,
-  ]
-}
-
 module "s3" {
   source = "./modules/s3"
 
@@ -23,24 +7,7 @@ module "s3" {
 
   # Security phase: default encryption moves from SSE-S3 to the CMK. Applies
   # to new objects only, so existing data stays readable untouched.
-  kms_key_arn = var.create_orchestration ? module.kms[0].key_arn : ""
-}
-
-module "iam" {
-  source = "./modules/iam"
-
-  bucket_name  = var.bucket_name
-  project_name = var.project_name
-  environment  = var.environment
-}
-
-module "cloudwatch" {
-  source = "./modules/cloudwatch"
-
-  project_name = var.project_name
-  environment  = var.environment
-
-  log_retention_days = var.log_retention_days
+  kms_key_arn = var.create_kms ? module.kms[0].key_arn : ""
 }
 
 module "redshift" {
@@ -79,7 +46,7 @@ module "rds" {
 
   # Security phase: ingress was 0.0.0.0/0. It is now the Glue security group,
   # which is the only consumer once the database is private.
-  source_security_group_id = var.create_orchestration ? module.network[0].glue_security_group_id : var.source_security_group_id
+  source_security_group_id = var.create_network ? module.network[0].glue_security_group_id : var.source_security_group_id
 
   database_name   = var.database_name
   master_username = var.master_username
@@ -98,82 +65,24 @@ module "rds" {
 ############################################
 # Secrets
 #
-# Additive. Holds the Redshift admin credential that the state machine's
-# Redshift Data API calls authenticate with. Declared before the
-# orchestration modules, which consume the secret ARN.
+# Holds the Redshift admin credential that the Redshift Data API calls
+# authenticate with. Retained through the NYC decommissioning because the
+# Redshift workgroup outlives the pipeline that introduced it.
 ############################################
 
 module "secrets" {
-  count  = var.create_orchestration ? 1 : 0
+  count  = var.create_secrets ? 1 : 0
   source = "./modules/secrets"
 
   project_name = var.project_name
   environment  = var.environment
 
-  kms_key_id = module.kms[0].key_arn
+  # Guarded: create_kms and create_secrets are independent flags since the
+  # decommissioning split them apart, so this index is reachable with the key
+  # absent. Falling back to null lets Secrets Manager use its AWS-managed key
+  # rather than failing the plan on an invalid index.
+  kms_key_id = var.create_kms ? module.kms[0].key_arn : null
 
   redshift_admin_username = var.redshift_admin_username
   redshift_admin_password = var.redshift_admin_password
-
-  rds_master_username = var.master_username
-  rds_master_password = random_password.rds_master.result
-}
-
-############################################
-# Orchestration and observability
-#
-# Both modules are additive. Monitoring is declared first because it owns the
-# alerts topic that the state machine's failure handler publishes to.
-############################################
-
-module "monitoring" {
-  count  = var.create_orchestration ? 1 : 0
-  source = "./modules/monitoring"
-
-  project_name = var.project_name
-  environment  = var.environment
-  aws_region   = var.aws_region
-
-  state_machine_name      = local.state_machine_name
-  glue_job_names          = local.pipeline_glue_job_names
-  redshift_workgroup_name = var.redshift_workgroup_name
-
-  alert_email = var.alert_email
-
-  pipeline_duration_alarm_ms         = var.pipeline_duration_alarm_ms
-  glue_failed_tasks_threshold        = var.glue_failed_tasks_threshold
-  redshift_compute_seconds_threshold = var.redshift_compute_seconds_threshold
-}
-
-module "stepfunctions" {
-  count  = var.create_orchestration ? 1 : 0
-  source = "./modules/stepfunctions"
-
-  project_name = var.project_name
-  environment  = var.environment
-  aws_region   = var.aws_region
-
-  state_machine_name = local.state_machine_name
-  log_retention_days = var.log_retention_days
-
-  silver_job_name           = aws_glue_job.silver_etl.name
-  gold_job_name             = aws_glue_job.gold_etl.name
-  golden_zone_job_name      = aws_glue_job.golden_zone_etl.name
-  warehouse_export_job_name = aws_glue_job.warehouse_export_etl.name
-
-  redshift_workgroup_name = var.redshift_workgroup_name
-  redshift_database       = var.redshift_database_name
-  redshift_secret_arn     = module.secrets[0].redshift_admin_secret_arn
-
-  # The load SQL stays the single source of truth; it is read, not restated.
-  copy_sql_path = "${path.root}/../services/redshift/load/02_copy_from_s3.sql"
-
-  quicksight_dataset_id = var.quicksight_dataset_id
-
-  redshift_poll_seconds    = var.redshift_poll_seconds
-  spice_poll_seconds       = var.spice_poll_seconds
-  pipeline_timeout_seconds = var.pipeline_timeout_seconds
-
-  sns_topic_arn = module.monitoring[0].alerts_topic_arn
-  kms_key_arn   = module.kms[0].key_arn
 }
