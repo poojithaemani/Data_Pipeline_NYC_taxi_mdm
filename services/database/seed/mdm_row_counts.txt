@@ -1,0 +1,11 @@
+MDM export verification
+==============================================
+table              exported   count(*)    match
+golden_zones            269        269       OK
+zone_matches            265        265       OK
+taxi_zones              265        265       OK
+pipeline_runs            33         33       OK
+audit_log                 2          2       OK
+
+total rows exported: 834
+result: ALL MATCH
