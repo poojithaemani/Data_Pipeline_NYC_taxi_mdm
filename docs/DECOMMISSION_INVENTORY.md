@@ -1,6 +1,11 @@
 # NYC Taxi MDM — final cleanup and reusable-resource retention
 
-**Project status: complete. Teardown EXECUTED 2026-08-20.**
+**Project status: complete. Teardown EXECUTED 2026-08-20. Retained resources
+removed 2026-10-01 / 2026-10-02 — the account now carries no recurring charge.**
+
+Sections 0–16 are the record of the 2026-08-20 teardown and are left as written.
+Where they describe a resource as *retained*, read §17: everything billable that
+was retained then has since been deleted.
 
 Identifiers are redacted throughout; live values are in the gitignored operator notes.
 
@@ -125,6 +130,10 @@ Harmless. That file is gitignored and yours — delete the line when convenient.
 ---
 
 ## 4. KEEP — retained resources (28 real resources)
+
+> **Superseded 2026-10-01.** The data lake bucket, KMS CMK, Redshift namespace
+> and workgroup, Redshift admin secret and the QuickSight account listed below
+> have all been removed. See §17 for what still exists.
 
 | Resource | Count | Why retained |
 |---|---:|---|
@@ -366,6 +375,10 @@ ap-south-1, ap-southeast-1): zero RDS, Redshift, Glue, EC2 and Lambda in each.
 
 ## 14. Final recurring cost
 
+> **Superseded 2026-10-01.** The QuickSight warning below came true: the seat
+> began billing in September and a second fee followed. Recurring cost is now
+> $0 — see §17.
+
 | Item | Cost | Note |
 |---|---|---|
 | KMS CMK | ~$1.00/mo | Required — encrypts the retained bucket |
@@ -418,3 +431,105 @@ Not recoverable from the repository, by design:
 - **Source data** — bronze is re-fetchable from the public NYC TLC URLs in
   `configs/source.yaml`; silver, gold and warehouse regenerate from it.
 - **MDM reference data** — restore from `services/database/seed/`.
+
+**Since 2026-10-02 a rebuild starts from empty Terraform state** (§17). Two
+consequences:
+
+- The state bucket still exists but holds nothing. It is itself declared in
+  `backend.tf`, so either import it into the fresh state or delete it and follow
+  the bootstrap order documented at the top of that file.
+- The free resources left behind — the GitHub OIDC provider, the CI plan/apply
+  roles, the Redshift role and the Redshift security group — will fail a fresh
+  apply with "already exists". Import them or delete them first.
+
+`redshift_admin_password` in `terraform.tfvars` no longer matches anything; pick
+a new value on rebuild.
+
+---
+
+## 17. Final shutdown — retained resources removed (2026-10-01 / 2026-10-02)
+
+### Why
+
+§7 D7 and §14 flagged the QuickSight author seat as "the charge most likely to
+appear unnoticed later". It did. September 2026 billed **$71.01**, of which
+QuickSight was **$60.09**:
+
+| Charge | Daily rate | September |
+|---|---|---:|
+| Author Pro seat (`ADMIN_PRO`) | $1.33 (~$40/mo) | $28.17 |
+| Amazon Q in QuickSight fee | $8.33 (~$250/mo) | $31.92 |
+
+The seat began billing on 2026-09-09. The Amazon Q fee began on 2026-09-27,
+taking the daily QuickSight charge from $1.33 to $9.67 — a run rate of roughly
+$290/month for an account holding no dashboards, datasets or data sources. That
+the two start dates mark trial expiries is inferred from the free-trial line
+items on the bill, not confirmed.
+
+The lesson is narrower than "delete everything": an idle Redshift Serverless
+workgroup genuinely cost nothing, while an idle QuickSight subscription bills
+per seat and per account regardless of use. No AWS Budget existed, so nothing
+alerted until the invoice.
+
+### What was removed
+
+All removals were done by the operator in the AWS console, outside Terraform.
+
+| Resource | Final state | Verified |
+|---|---|---|
+| QuickSight subscription | `UNSUBSCRIBED`; termination protection disabled first | 2026-10-01 |
+| QuickSight VPC connection + its 3 ENIs | `DELETED` | 2026-10-01 |
+| Redshift Serverless workgroup + namespace | Gone; 0 snapshots, 0 recovery points | 2026-10-01 |
+| Redshift-managed VPC endpoint + its 3 ENIs | Gone with the workgroup | 2026-10-01 |
+| Redshift admin secret | Gone, not in a recovery window | 2026-10-01 |
+| KMS CMK | `PendingDeletion`, removed 2026-10-08. Not billed while pending | 2026-10-01 |
+| S3 data lake bucket | Deleted (was already empty) | 2026-10-01 |
+| Terraform state bucket contents | 47 versions + 38 delete markers purged; bucket kept, empty | 2026-10-02 |
+
+Two Aurora cluster snapshots from July were deleted in the same pass. They
+belonged to earlier practice clusters and were never part of this project, which
+used a single RDS PostgreSQL instance.
+
+Worth knowing for any similar cleanup:
+
+- **A versioned bucket that looks empty may not be.** The state bucket showed 0
+  objects while still storing 47 non-current versions. Only the console's
+  *Empty* action, or an explicit version purge, clears them.
+- **Aurora snapshots are cluster snapshots**, listed separately from RDS
+  instance snapshots. A check of instance snapshots alone reports none.
+
+### What still exists (all free)
+
+- Terraform state bucket — empty, versioning on
+- GitHub OIDC provider and the CI plan/apply roles
+- Redshift IAM role, QuickSight VPC role, QuickSight service role
+- Redshift security group, plus the VPC default group
+- The account's default VPC and subnets
+- AWS's default Athena workgroup and default Glue database
+
+### Verification (2026-10-02)
+
+us-east-2 zero across: QuickSight users, Redshift workgroups/namespaces, RDS
+instances, clusters, instance and cluster snapshots, automated backups, secrets,
+EC2, EBS volumes and snapshots, Elastic IPs, NAT gateways, VPC endpoints, ENIs,
+load balancers, Glue jobs/crawlers/triggers/connections, Lambda, Step Functions,
+EventBridge rules, SNS, SQS, DynamoDB, ECR, CloudTrail, alarms and dashboards.
+One empty Glue log group remains (0 bytes).
+
+All 17 enabled regions swept for EC2, EBS, snapshots, Elastic IPs, NAT gateways,
+VPC endpoints, RDS, secrets and Lambda: clean in every one.
+
+Every bucket in the account: 0 current objects, 0 versions, 0 delete markers,
+0 incomplete multipart uploads.
+
+**Recurring cost: $0.** Not yet observed on a bill — Cost Explorer lags by about
+a day, so the first full zero-charge day had not posted when this was written.
+October will still carry the partial QuickSight charge for 2026-10-01.
+
+### Terraform state no longer matches AWS
+
+§12 and §13 record `terraform plan` → *No changes*. That is no longer true and
+cannot be re-run as-is: the remote state is gone, and the retained resources the
+configuration still declares (CMK, Redshift, admin secret, data lake bucket)
+were deleted by hand. The configuration is now a description of what to build,
+not of what exists.
